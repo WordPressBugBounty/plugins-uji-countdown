@@ -1,0 +1,631 @@
+/* iCheck plugin Flat skin, purple
+----------------------------------- */
+.icheckbox_flat-purple,
+.iradio_flat-purple {
+    display: inline-block;
+    *display: inline;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background: url(purple.png) no-repeat;
+    border: none;
+    cursor: pointer;
+}
+
+.icheckbox_flat-purple {
+    background-position: 0 0;
+}
+    .icheckbox_flat-purple.checked {
+        background-position: -22px 0;
+    }
+    .icheckbox_flat-purple.disabled {
+        background-position: -44px 0;
+        cursor: default;
+    }
+    .icheckbox_flat-purple.checked.disabled {
+        background-position: -66px 0;
+    }
+
+.iradio_flat-purple {
+    background-position: -88px 0;
+}
+    .iradio_flat-purple.checked {
+        background-position: -110px 0;
+    }
+    .iradio_flat-purple.disabled {
+        background-position: -132px 0;
+        cursor: default;
+    }
+    .iradio_flat-purple.checked.disabled {
+        background-position: -154px 0;
+    }
+
+/* HiDPI support */
+@media (-o-min-device-pixel-ratio: 5/4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi), (min-resolution: 1.25dppx) {
+    .icheckbox_flat-purple,
+    .iradio_flat-purple {
+        background-image: url(purple@2x.png);
+        -webkit-background-size: 176px 22px;
+        background-size: 176px 22px;
+    }
+}
+
+
+
+/*
+============================================================================
+Notyf v3.0.0 
+============================================================================
+*/
+
+
+@-webkit-keyframes notyf-fadeinup{0%{opacity:0;transform:translateY(25%)}to{opacity:1;transform:translateY(0)}}@keyframes notyf-fadeinup{0%{opacity:0;transform:translateY(25%)}to{opacity:1;transform:translateY(0)}}@-webkit-keyframes notyf-fadeinleft{0%{opacity:0;transform:translateX(25%)}to{opacity:1;transform:translateX(0)}}@keyframes notyf-fadeinleft{0%{opacity:0;transform:translateX(25%)}to{opacity:1;transform:translateX(0)}}@-webkit-keyframes notyf-fadeoutright{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(25%)}}@keyframes notyf-fadeoutright{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(25%)}}@-webkit-keyframes notyf-fadeoutdown{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(25%)}}@keyframes notyf-fadeoutdown{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(25%)}}@-webkit-keyframes ripple{0%{transform:scale(0) translateY(-45%) translateX(13%)}to{transform:scale(1) translateY(-45%) translateX(13%)}}@keyframes ripple{0%{transform:scale(0) translateY(-45%) translateX(13%)}to{transform:scale(1) translateY(-45%) translateX(13%)}}.notyf{position:fixed;top:0;left:0;height:100%;width:100%;color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;pointer-events:none;box-sizing:border-box;padding:20px}.notyf__icon--error,.notyf__icon--success{height:21px;width:21px;background:#fff;border-radius:50%;display:block;margin:0 auto;position:relative}.notyf__icon--error:after,.notyf__icon--error:before{content:"";background:currentColor;display:block;position:absolute;width:3px;border-radius:3px;left:9px;height:12px;top:5px}.notyf__icon--error:after{transform:rotate(-45deg)}.notyf__icon--error:before{transform:rotate(45deg)}.notyf__icon--success:after,.notyf__icon--success:before{content:"";background:currentColor;display:block;position:absolute;width:3px;border-radius:3px}.notyf__icon--success:after{height:6px;transform:rotate(-45deg);top:9px;left:6px}.notyf__icon--success:before{height:11px;transform:rotate(45deg);top:5px;left:10px}.notyf__toast{display:block;overflow:hidden;pointer-events:auto;-webkit-animation:notyf-fadeinup .3s ease-in forwards;animation:notyf-fadeinup .3s ease-in forwards;box-shadow:0 3px 7px 0 rgba(0,0,0,.25);position:relative;padding:0 15px;border-radius:2px;max-width:300px;transform:translateY(25%);box-sizing:border-box;flex-shrink:0}.notyf__toast--disappear{transform:translateY(0);-webkit-animation:notyf-fadeoutdown .3s forwards;animation:notyf-fadeoutdown .3s forwards;-webkit-animation-delay:.25s;animation-delay:.25s}.notyf__toast--disappear .notyf__icon,.notyf__toast--disappear .notyf__message{-webkit-animation:notyf-fadeoutdown .3s forwards;animation:notyf-fadeoutdown .3s forwards;opacity:1;transform:translateY(0)}.notyf__toast--disappear .notyf__dismiss{-webkit-animation:notyf-fadeoutright .3s forwards;animation:notyf-fadeoutright .3s forwards;opacity:1;transform:translateX(0)}.notyf__toast--disappear .notyf__message{-webkit-animation-delay:.05s;animation-delay:.05s}.notyf__toast--upper{margin-bottom:20px}.notyf__toast--lower{margin-top:20px}.notyf__toast--dismissible .notyf__wrapper{padding-right:30px}.notyf__ripple{height:400px;width:400px;position:absolute;transform-origin:bottom right;right:0;top:0;border-radius:50%;transform:scale(0) translateY(-51%) translateX(13%);z-index:5;-webkit-animation:ripple .4s ease-out forwards;animation:ripple .4s ease-out forwards}.notyf__wrapper{display:flex;align-items:center;padding-top:17px;padding-bottom:17px;padding-right:15px;border-radius:3px;position:relative;z-index:10}.notyf__icon{width:22px;text-align:center;font-size:1.3em;opacity:0;-webkit-animation:notyf-fadeinup .3s forwards;animation:notyf-fadeinup .3s forwards;-webkit-animation-delay:.3s;animation-delay:.3s;margin-right:13px}.notyf__dismiss{position:absolute;top:0;right:0;height:100%;width:26px;margin-right:-15px;-webkit-animation:notyf-fadeinleft .3s forwards;animation:notyf-fadeinleft .3s forwards;-webkit-animation-delay:.35s;animation-delay:.35s;opacity:0}.notyf__dismiss-btn{background-color:rgba(0,0,0,.25);border:none;cursor:pointer;transition:opacity .2s ease,background-color .2s ease;outline:none;opacity:.35;height:100%;width:100%}.notyf__dismiss-btn:after,.notyf__dismiss-btn:before{content:"";background:#fff;height:12px;width:2px;border-radius:3px;position:absolute;left:calc(50% - 1px);top:calc(50% - 5px)}.notyf__dismiss-btn:after{transform:rotate(-45deg)}.notyf__dismiss-btn:before{transform:rotate(45deg)}.notyf__dismiss-btn:hover{opacity:.7;background-color:rgba(0,0,0,.15)}.notyf__dismiss-btn:active{opacity:.8}.notyf__message{vertical-align:middle;position:relative;opacity:0;-webkit-animation:notyf-fadeinup .3s forwards;animation:notyf-fadeinup .3s forwards;-webkit-animation-delay:.25s;animation-delay:.25s;line-height:1.5em}@media only screen and (max-width:480px){.notyf{padding:0}.notyf__ripple{height:600px;width:600px;-webkit-animation-duration:.5s;animation-duration:.5s}.notyf__toast{max-width:none;border-radius:0;box-shadow:0 -2px 7px 0 rgba(0,0,0,.13);width:100%}.notyf__dismiss{width:56px}}
+
+
+/*
+============================================================================
+Admin NEW
+============================================================================
+*/
+
+#ujic_new{
+   width: 600px;
+   margin-top: 20px;
+   display: block;
+   float: left;
+	background: 0 0 url('../images/back.jpg');
+	background-size: cover;
+	color: white;
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+   padding: 30px 40px;
+   text-align: center;
+   font-family: "Open Sans",sans-serif;
+}
+
+.ujic_butnew{
+   display: inline-block;
+   font-size: 14px;
+   padding: 8px 15px;
+   text-align: center;
+   border: 1px solid #ffffff;
+   -webkit-border-radius: 2px;
+   -moz-border-radius: 2px;
+   border-radius: 2px;
+   color: #ffffff;
+   text-decoration: none;
+}
+
+.ujic_butnew:hover{
+   background: #ffffff;
+   color: #a61ba6;
+}
+
+#ujic_new h1,
+#ujic_new h2,
+#ujic_new h3{
+   color: #ffffff;
+}
+
+.ujic_new_cnt{
+   border-top: 1px solid #ffffff;
+   margin-top: 30px;
+   padding-top: 30px;
+}
+
+.ujic_new_cnt ul{
+   margin: 0;
+}
+
+
+.ujic_new_cnt ul li{
+   margin: 30px 0;
+   display: block;
+}
+/*
+============================================================================
+Admin Icons
+============================================================================
+*/
+#icon-options-general{
+  background: transparent url("../images/ucount-icon.png") no-repeat 0 0;
+}
+
+.ujc-admin-tit{
+   background: transparent url("../images/ucount-icon.png") no-repeat 0 8px;
+   padding-left: 40px!important;
+}
+
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (min-device-pixel-ratio: 2) {
+
+  #icon-options-general{
+    background-image: url("../images/ucount-icon@x2.png");
+    background-size: 32px 187px;
+  }
+  
+  .ujc-admin-tit{
+    background: transparent url("../images/ucount-icon@x2.png") no-repeat 0 8px;
+    padding-left: 40px!important;
+    background-size: 32px 187px;
+   }
+}
+
+
+.ujic-mico{
+    position: relative;
+    top: 4px;    
+    padding-right: 4px;
+}
+
+/*
+============================================================================
+Admin Message
+============================================================================
+*/
+#message {
+    width: 943px;
+}
+
+
+/*
+============================================================================
+Color Picker Fix
+============================================================================
+*/
+
+.iris-picker .iris-slider-offset {
+
+}
+
+/*
+============================================================================
+Admin Form
+============================================================================
+*/
+
+.uji-fedit .postbox{
+	background: #FEF4FF;
+}
+
+.ujic-create{
+	width: 680px;
+	float: left;
+	display: inline-block;
+    margin: 10px 0 0 5px;
+}
+
+.ujic-create .label {
+	float: left;
+	font-weight: normal;
+	width: 200px;
+	height: 40px;
+	line-height: 40px;
+}
+
+.ujic-create .regular-chk{
+	margin-top: 4px;
+}
+
+.ujic-create .mini{
+ 	width: 40px;
+}
+
+.ujic-create .ujic-box {
+	overflow: hidden;
+	display: block;
+	margin: 15px 0;
+	border-bottom: 1px solid #e1e1e1;
+	padding-bottom: 15px;
+}
+
+.ujic-block-box{
+    display: block;
+    width: 100%;
+    padding: 15px 0 0 200px;
+    float: left;
+}
+
+.ujic-settings .ujic-box {
+	border-bottom: 0;
+}
+
+
+/* Input Option */
+
+.ujic-create .regular-text{
+	margin-top: 10px;
+}
+
+/* SliderUI Option */
+
+.ujic_sliderui{
+	margin-top: 15px;
+}
+
+/* Checkbox Option */
+
+
+
+
+.ujic-chkbtn{
+	float: left;
+	position: relative;
+	margin: 10px 0 0 0;
+}
+
+.icheckbox_flat-pink, .iradio_flat-pink {
+	display: inline-block!important;
+	float: left!important;
+	margin-right: 10px!important;
+}
+
+.ujic-chkbtn label{
+	float: left;
+	line-height: 22px;
+	padding-right: 15px;
+}
+
+/* Radiobox Option */
+
+#img-none{
+	background: url("../images/align-none.png") right 3px  no-repeat;	
+	padding-right: 25px;
+}
+
+#img-left{
+	background: url("../images/align-left.png") right 3px  no-repeat;
+	padding-right: 30px;
+}
+
+#img-center{
+	background: url("../images/align-center.png") right 3px  no-repeat;	
+	padding-right: 30px;
+}
+
+#img-right{
+	background: url("../images/align-left.png") right 3px  no-repeat;	
+	padding-right: 30px;
+}
+
+.ujic-radbtn{
+	margin: 10px;
+}
+
+.ujic-radbtn label{
+	float: left;
+	line-height: 20px;
+	margin-right: 20px;
+}
+
+/* select Option */
+.ujic-select{
+	padding: 4px;
+	border: 1px solid #aeaeae;
+	background: #bc59bc;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	float: left;
+}
+
+/* Style Option */
+
+.ujic-types{
+	width: 32px;
+	height: 34px;
+	display: block;
+	float: left;
+	padding: 0 2px;
+	text-indent: -99999px;
+	margin-right: 20px;
+	border: 1px solid transparent;
+}
+
+.ujic-types:hover{
+	border: 1px solid #cfcfcf;
+}
+
+.ujic-types-sel{
+	border: 1px solid #bbbbbb!important;
+}
+
+
+#ujic-style-classic{
+	background: url(../images/classic.png) center 1px no-repeat;
+}
+
+/*
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (min-device-pixel-ratio: 2) {
+	#ujic-style-classic{
+		background: url(../images/classic@2.png) no-repeat;
+	}
+	#ujic-style-modern{
+		background: url(../images/modern@2.png) no-repeat;
+	}
+	#ujic-style-custom{
+		background: url(../images/custom@2.png) no-repeat;
+	}
+}*/
+/* Color Option */
+
+.ujic-color{
+	overflow: hidden;
+	clear: both;
+	float: none;
+}
+
+.ujic-color span{
+	display: block;
+}
+
+.ujic-color .ujic-color-hold{
+	float: left;
+	display: inline-block;
+	margin-right: 20px;
+}
+
+.ujic-color-box {
+    display: block;
+    float: left;
+    overflow: hidden;
+}
+
+/* Button Option */
+.ujic-create .submit{
+	display: inline;
+	margin-right: 10px;
+}
+
+/*
+============================================================================
+Table Admin
+============================================================================
+*/
+
+#ujic_table{
+	padding: 20px 0;
+	width: 680px;
+	float: left;
+	
+}
+
+#ujic_table{
+	line-height: 30px;
+}
+
+#ujic_table_new{
+	margin: 0 0 10px 0;
+}
+
+#message{
+	margin: 20px 0 0 0;
+}
+
+.ujic-submit-hold{
+    display: block;
+    overflow:hidden;
+    margin: 20px 0 0 0;
+}
+
+/*
+============================================================================
+Tutorial Admin
+============================================================================
+*/
+
+.ujic-tut{
+	float: left;
+	display: inline;
+	margin: 10px 0 0 10px;
+}
+
+/*
+============================================================================
+Preview Style
+============================================================================
+*/
+
+.ujic-preview{
+	display: block;
+	float: none;
+	clear: both;
+	width: 970px;
+}
+
+.ujic-preview .postbox {
+	overflow: hidden;
+	z-index: 9999;
+}
+
+.ujic-preview .postbox:hover {
+	cursor: move;
+}
+
+#ujiCountdown{
+	margin-bottom: 20px;
+	overflow: hidden;
+	padding-top: 10px;
+}
+
+#ujiCountdown .ujic_y,
+#ujiCountdown .ujic_o,
+#ujiCountdown .ujic_w
+{
+	display: none;	
+}
+
+.ujic-classic .countdown_section { 
+	float:left; 
+	display: block; 
+	text-align: center;
+	margin: 0 15px 0 0;
+}
+
+.ujic-classic span.countdown_amount {
+	display: inline-block;
+	color: #fff;
+	padding: 5px 10px 5px 10px;
+	margin-right: 2px;
+
+	font: 35px/1.5 'Open Sans Condensed',sans-serif;
+	font-weight: normal; 
+	
+	box-shadow:1px 1px 1px rgba(4, 4, 4, 0.35);
+	
+   -webkit-border-radius: 5px;
+   -ms-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-o-border-radius: 5px;
+	border-radius: 5px;
+	text-shadow: 1px 1px 1px #000;
+	
+	background: #a61ba6; /* Old browsers */
+	background: -moz-linear-gradient(top,  #a61ba6 50%, #c368c3 50%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(50%,#a61ba6), color-stop(50%,#c368c3)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #a61ba6 50%,#c368c3 50%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #a61ba6 50%,#c368c3 50%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #a61ba6 50%,#c368c3 50%); /* IE10+ */
+	background: linear-gradient(to bottom,  #a61ba6 50%,#c368c3 50%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a61ba6', endColorstr='#c368c3',GradientType=0 ); /* IE6-9 */
+
+}
+
+.ujic-classic span.countdown_txt {
+	display: block;
+	text-align: center;
+	margin: 5px 0 0 0;
+}
+
+/*
+============================================================================
+Admin Shortcode
+============================================================================
+*/
+
+.ujic_date_admin {
+    background: url("../images/data-picker.png")  no-repeat scroll right top;
+    display:block;
+    
+}
+
+#ujic-scode {
+    background: #efefef;
+    padding: 15px 20px;
+    font-size: 1em;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+
+/*
+============================================================================
+Newsletter
+============================================================================
+*/
+
+/*.ujicf:before, .ujicf:after { content: ""; display: table; }
+.ujicf:after { clear: both; }
+.ujicf { *zoom: 1; }
+
+#ujiCountdown
+{
+    display:inline-block;
+    margin-bottom:0;
+}
+
+#ujiCountdown span.countdown_row
+{
+    display:block;
+}
+
+#ujiCountdown span.ujic_s
+{
+    margin-right: 0;
+}
+
+#ujiCountdown form
+{
+    display:block;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+	background: #fff center center url("uji-box-bg.png");
+}
+
+#ujiCountdown form span
+{
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2em;
+    margin: 1em 0;
+    text-align: center;
+}
+
+#ujiCountdown form p
+{
+    width:100%;
+    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#ujiCountdown form input
+{
+    display:inline;
+    margin:0;
+    height: 40px;
+}
+
+#ujiCountdown form div
+{
+    text-align: center;
+}
+
+#ujiCountdown form input[type="text"]
+{
+    background: none repeat scroll 0 0 #fff;
+    border: medium none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) inset;
+    border-radius: 3px 0 0 3px;
+    font-size: 15px;
+    margin: 0;
+    padding: 10px 5%;
+    text-align: center;
+    width: 70%;
+    float:left;
+}
+
+#ujiCountdown form input[type="submit"]
+{
+    border-radius: 0 3px 3px 0;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0 3%;
+    text-transform: uppercase;
+    width: 30%;
+    border: medium none;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    color: #fff;
+    background: linear-gradient(to bottom , #c816d0, #ab02b2) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    float:left;
+}*/
+
+
+/*
+============================================================================
+Responsive
+============================================================================
+*/
+
+@media only screen 
+and (max-width : 1169px) {
+    .ujic-tut{
+        display: none;
+    }
+}

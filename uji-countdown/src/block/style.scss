@@ -1,0 +1,128 @@
+@import "../common.scss";
+/**
+ * #.# Styles
+ *
+ * CSS for both Frontend+Backend.
+ */
+
+ .wp-block-urc-block  {
+  background: $lightblu;
+  border: 0.1rem solid $midblu;
+  color: $blue;
+  margin: 0 auto;
+  
+  padding: 1rem;
+}
+
+ .wp-block-urc-block  .dashicons-clock {
+         margin: 8px 4px 0 0;
+ }
+
+.wp-block-urc-block-uji-countdown time{
+    font-family: "Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    font-size: 1.3rem;
+}
+
+.wp-block-span{
+    display: block;
+    font-size: 1rem;
+}
+
+.wp-block-ujicount-datetime{
+  color: rgb(115, 45, 182);
+}
+
+.components-datetime{
+  padding: 0;
+}
+
+.urc-component .spaceInp{
+  width: 55px;
+  display: inline-block;
+}
+
+.urc-component input[type=number]{
+    text-align: center;
+}
+
+.urc-component input[type=number]::-webkit-inner-spin-button, 
+.urc-component input[type=number]::-webkit-outer-spin-button  { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+.urc-component-time{
+    margin-bottom: 15px;
+}
+
+.wp-ujiblock-red{
+    color: #ce078b;
+}
+
+.wp-ujiblock-ml {
+    margin-left: 24px;
+}
+
+.urc-component .components-datetime__time .components-base-control__field,
+.urc-component .components-datetime__time .components-base-control {
+    margin-bottom: 0!important;
+}
+
+.urc-component .components-datetime__time .components-base-control{
+    width: 100%;
+}
+
+.components-time-field-hours-input{
+    width: 23%;
+    display: inline-block;
+    margin-right: 0.5rem;
+    position: relative;
+    top: 3px;
+    margin-bottom: 0!important;
+}
+
+.urc-border{
+    border-top: 1px solid #e2e4e7;
+    padding: 10px 0;
+}
+
+.components-time-field-hours-select{
+    width: 35%;
+    display: inline-block;
+}
+
+.components-repeat-field-input{
+    width: 23%;
+    display: inline-block;
+    margin-bottom: 0!important;
+}
+
+.urc-component .components-base-control{
+    display: inline-block;
+}
+
+.urc-component i{
+  margin-left: 58px;
+  display: block;
+}
+
+.urc-time-separator{
+  padding: 0 0.5rem 0 0;
+  display: inline-block;
+}
+
+.urc-component-time h4,
+.urc-border h4{
+  margin: 0.8em 0;
+}
+
+
+.urc-flex {
+    display: flex;
+    align-items: normal;
+}
+
+.urc-flex .components-input-control__container {
+    min-width: 90px;
+    top: 3px;
+}

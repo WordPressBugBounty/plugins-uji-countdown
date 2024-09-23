@@ -1,0 +1,21 @@
+@import "node_modules/@wordpress/base-styles/variables";
+@import "node_modules/@wordpress/base-styles/colors";
+@import "node_modules/@wordpress/base-styles/mixins";
+@import "node_modules/@wordpress/base-styles/breakpoints";
+
+/**
+ * #.# Common SCSS
+ *
+ * Can include things like variables and mixins
+ * that are used across the project.
+*/
+
+// Colors.
+$black: rgb(41, 41, 41);
+$white: #f4f4f4;
+$gray: #dedede;
+$green: #bada55;
+$red: orangered;
+$blue: rgb(78, 56, 177);
+$lightblu: #f0ecff;
+$midblu:#a698d8;

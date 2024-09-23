@@ -1,0 +1,62 @@
+{
+  "name": "urc/block-uji-countdown",
+  "category": "common",
+  "attributes": {
+    "countStyles": {
+      "type": "string",
+      "default": "Please select a style for your timer"
+    },
+    "datetime": {
+      "type": "string",
+      "default": "2023-01-01 12:00:00"
+    },
+    "timeonly": {
+      "type": "string",
+      "default": "12:00"
+    },
+    "isStackedOnMobile": {
+      "type": "boolean",
+      "default": false
+    },
+    "timerType": {
+      "type": "string",
+      "default": "onetime"
+    },
+    "thour": {
+      "type": "string",
+      "default": ""
+    },
+    "tmin": {
+      "type": "string",
+      "default": ""
+    },
+    "tsec": {
+      "type": "string",
+      "default": ""
+    },
+    "hide": {
+      "type": "boolean",
+      "default": true
+    },
+    "url": {
+      "type": "string",
+      "default": ""
+    },
+    "unitNum": {
+      "type": "string",
+      "default": "hou"
+    },
+    "unitTime": {
+      "type": "string",
+      "default": "sec"
+    },
+    "repeats": {
+      "type": "string",
+      "default": ""
+    },
+    "news": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}
