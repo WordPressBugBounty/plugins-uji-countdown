@@ -156,10 +156,6 @@ class Uji_Countdown_Admin {
 			}
 		}
 
-			// Left Metaboxes
-		if ( isset( $_GET['tab'] ) && $_GET['tab'] == 'tab_ujic_new' ) {
-				$this->left_metaboxes();
-		}
 	}
 
 		/**
@@ -212,8 +208,6 @@ class Uji_Countdown_Admin {
 
 			echo $this->custom_metabox( __( 'Generate Shortcode', 'ujicountdown' ), $cnt, 'ujic-create' );
 
-			// Left Metaboxes
-			// $this->left_metaboxes();
 			// Preview Metaboxes
 			$this->sc_metaboxes( $cur_style, $vars );
 	}
@@ -284,11 +278,7 @@ class Uji_Countdown_Admin {
 		} else {
 				echo $this->custom_metabox( __( 'Create New Timer Style', 'ujicountdown' ), $cnt, 'ujic-create' );
 		}
-
-			// Left Metaboxes
-
-			$this->left_metaboxes();
-
+			
 			// Preview Metaboxes
 			$this->prev_metaboxes( $cur_style, $vars );
 	}
@@ -439,22 +429,6 @@ class Uji_Countdown_Admin {
 		if ( isset( $prw ) && ! empty( $prw ) ) {
 				echo $this->custom_metabox( __( 'Preview Timer Style', 'ujicountdown' ), $prw, 'ujic-preview', true );
 		}
-	}
-
-		/**
-		 * Tutorial metaboxes.
-		 *
-		 * @since    2.0
-		 */
-	public function left_metaboxes() {
-			$tut_sho = '<div>
-                        <h4>From Block Editor (Gutenberg)</h4>
-                        <img src="' . esc_url( UJICOUNTDOWN_URL ) . 'assets/images/ujic-ps0.png"></div>
-                    <div>
-                        <h4>From Classic Editor (Gutenberg)</h4>
-                        <img src="' . esc_url( UJICOUNTDOWN_URL ) . 'assets/images/ujic-ps.jpg"></div>';
-			$tut_wid = '<img src="' . esc_url( UJICOUNTDOWN_URL ) . 'assets/images/ujic-ps2.jpg">';
-			echo $this->multi_custom_metabox( array( __( 'How To Add Countdown Shortcode', 'ujicountdown' ), __( 'Add New Countdown <br>from the Widget Areas', 'ujicountdown' ) ), array( $tut_sho, $tut_wid ), 'ujic-tut' );
 	}
 
 		/**
@@ -726,7 +700,7 @@ class Uji_Countdown_Admin {
 			if ( $this->cform_errors() ) {
 				$this->ins_ujic_db( ujic_clean( wp_unslash($_POST ) ) );
 				$this->ujic_message( __( 'Your Timer Style Has Been Created', 'ujicountdown' ) );
-				echo esc_js( '<script type="text/javascript"> ujic_admin_home(); </script>' );
+				wp_add_inline_script( 'jquery-core', 'ujic_admin_home();' );
 			}
 		}
 
@@ -822,7 +796,7 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_delete() {
-		if ( isset( $_GET['del'] ) && ( ! empty( $_GET['del'] ) && is_numeric( $_GET['del'] ) ) ) {
+		if ( isset( $_GET['del'] ) && ( ! empty( $_GET['del'] ) && is_numeric( $_GET['del'] ) ) ) {			
 				$this->del_ujic_db( trim( ujic_clean( wp_unslash($_GET['del'] ) ) ) );
 				$this->ujic_message( __( 'Your countdown style was deleted', 'ujicountdown' ) );
 		}

@@ -364,7 +364,11 @@ class Uji_Countdown extends Uji_Countdown_Admin
         global $wpdb;
         
         if ( is_numeric( $id ) ) {
-                $wpdb->query( $wpdb->prepare( "DELETE FROM " . self::ujic_tab_name() . " WHERE id = '%d'" ), $id );
+            $sql = $wpdb->prepare(
+                "DELETE FROM " . self::ujic_tab_name() . " WHERE id = %d",
+                $id
+            );
+            $wpdb->query( $sql );
         }
     }
 

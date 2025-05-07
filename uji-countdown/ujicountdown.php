@@ -2,14 +2,16 @@
 /*
 Plugin Name: Uji Countdown
 Plugin URI: http://www.wpmanage.com/uji-countdown
-Description: HTML5 Customizable Countdown.
-Version: 2.3.2
+Description: Customizable Countdown.
+Version: 2.3.3
 Text Domain: ujicountdown
 Domain Path: /lang
 Author: Wpmanage.com
 Author URI: http://wpmanage.com
+Requires at least: 6.4
+Requires PHP: 8.0
 License: GPLv2
-Copyright 2023  WPmanage  (email : info@wpmanage.com)
+Copyright 2025 WPmanage  (email : info@wpmanage.com)
 */
 
 // Exit if accessed directly.
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 defined( 'WPINC' ) || exit;
 
 define( 'UJIC_NAME', defined('UJIC_NAMEPRO') ? UJIC_NAMEPRO : 'Uji Countdown' );
-define( 'UJIC_ORIG', '2.3.2' );
+define( 'UJIC_ORIG', '2.3.3' );
 define( 'UJIC_VERS', defined('UJIC_VERSPRO') ? UJIC_VERSPRO : UJIC_ORIG  );
 define( 'UJIC_FOLD', 'uji-countdown' );
 define( 'UJICOUNTDOWN', trailingslashit( dirname(__FILE__) ) );

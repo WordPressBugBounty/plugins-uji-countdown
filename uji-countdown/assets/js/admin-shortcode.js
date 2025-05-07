@@ -15,7 +15,7 @@ jQuery( function( $ ) {
     var clipboard = new ClipboardJS('.ujibtn-sc-copy');
 
     // Init Notyf
-    var notyf = new Notyf({position: {x:'right',y:'center'}, duration: 8000, dismissible: true });
+    var notyf = new Notyf({position: {x:'top',y:'top'}, duration: 228000, dismissible: true });
 
     // Init Datapicker
     $('.ujic-date').find('.ujic_date_admin').datepicker({
