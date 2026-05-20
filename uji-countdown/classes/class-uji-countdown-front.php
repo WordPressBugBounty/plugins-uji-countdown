@@ -86,8 +86,15 @@ class UjiCountdown extends Uji_Countdown {
 		// Grab the global $post object.
 		global $post;
 
-		// See if the post HAS content and, if so, see if it has our shorcode.
-		if ( isset( $post->post_content ) && has_shortcode( $post->post_content, 'ujicountdown' ) ) {
+		$has_shortcode = isset( $post->post_content ) && has_shortcode( $post->post_content, 'ujicountdown' );
+
+		if ( ! $has_shortcode && isset( $post->ID ) ) {
+			$elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
+			$has_shortcode  = is_string( $elementor_data ) && has_shortcode( $elementor_data, 'ujicountdown' );
+		}
+
+		// See if the post has our shortcode in content or Elementor widget data.
+		if ( $has_shortcode ) {
 			wp_enqueue_style( 'ujicountdown-uji-countdown' );
 				wp_enqueue_script( $this->ujic_pro_sx() . '-core' );
 

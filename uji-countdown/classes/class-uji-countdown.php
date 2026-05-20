@@ -600,7 +600,30 @@ class Uji_Countdown extends Uji_Countdown_Admin
     public function enqueue_scripts() {
         wp_register_style( 'ujicountdown-uji-countdown',  esc_url( UJICOUNTDOWN_URL ) . 'css/uji-countdown.css', array(), $this->version );
         wp_register_script( 'ujicountdown-core',  esc_url( UJICOUNTDOWN_URL ) . 'js/jquery.countdown.js', array( 'jquery' ), $this->version, false );
-        wp_register_script( 'ujicountdown-init',  esc_url( UJICOUNTDOWN_URL ) . 'js/uji-countdown.js', array( 'jquery' ), $this->version, true );
+
+        $countdown_alias_script = '(function($){'
+            . 'if(!$||!$.fn||!$.fn.countdown){return;}'
+            . '$.fn.ujicCountdown=$.fn.countdown;'
+            . 'if($.countdown){$.ujicCountdown=$.countdown;}'
+            . '})(jQuery);';
+        wp_add_inline_script( 'ujicountdown-core', $countdown_alias_script, 'after' );
+
+        wp_register_script( 'ujicountdown-init',  esc_url( UJICOUNTDOWN_URL ) . 'js/uji-countdown.js', array( 'jquery', 'ujicountdown-core' ), $this->version, true );
+
+        $countdown_compat_script = '(function($){'
+            . 'if(!$||!$.fn||!$.fn.ujicCountdown){return;}'
+            . 'var ujicFn=$.fn.ujicCountdown;'
+            . 'var ujicManager=$.ujicCountdown||$.countdown;'
+            . 'var otherFn=$.fn.countdown!==ujicFn?$.fn.countdown:null;'
+            . 'if(ujicManager){$.countdown=ujicManager;}'
+            . '$.fn.countdown=function(options){'
+            . 'var isUjic=options&&typeof options==="object"&&("until" in options||"since" in options||"serverSync" in options||"ujic_id" in options);'
+            . 'if(isUjic||!otherFn){if(ujicManager){$.countdown=ujicManager;}return ujicFn.apply(this,arguments);}'
+            . 'return otherFn.apply(this,arguments);'
+            . '};'
+            . '})(jQuery);';
+        wp_add_inline_script( 'ujicountdown-init', $countdown_compat_script, 'before' );
+
         wp_register_script( 'ujiCountRedirect',  esc_url( UJICOUNTDOWN_URL ) . 'js/uji-count-expired.js', array( 'jquery' ), $this->version, true );
         //Extend enqueues css and js
          $extent_scripts  = apply_filters( 'ujic_scripts_extend', true);

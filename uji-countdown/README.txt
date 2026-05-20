@@ -3,8 +3,8 @@ Contributors: ujimoto
 Donate link: https://www.wpmanage.com/uji-countdown
 Tags: countdown, counter, js countdown, animated countdown, timer, recurring timer
 Requires at least: 4.6
-Tested up to: 6.8
-Stable tag: 2.3.3
+Tested up to: 6.9
+Stable tag: 2.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,10 @@ Enable **Server Time** to ensure the countdown is based on your server’s clock
 3. Front-end example (classic style).
 
 == Changelog ==
+
+= 2.3.4 =
+* Fixed shortcode loading inside Elementor widgets.
+* Fixed a JavaScript conflict with Pixfort Core's Elementor countdown widget.
 
 = 2.3.3 =
 * Fixed incompatibility with the latest WordPress and PHP versions.
@@ -140,8 +144,8 @@ Enable **Server Time** to ensure the countdown is based on your server’s clock
 
 == Upgrade Notice ==
 
-= 2.3.2 =  
-Minor improvements to the Block Editor and deprecation handling. Update recommended.
+= 2.3.4 =  
+Fixes Elementor shortcode loading and countdown JavaScript compatibility with Pixfort Core. Update recommended.
 
 == Support ==
 
