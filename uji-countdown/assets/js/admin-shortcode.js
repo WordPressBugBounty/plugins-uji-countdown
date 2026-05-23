@@ -8,22 +8,23 @@
     
     
 jQuery( function( $ ) {
-    // Hide Preview Shortcode
-    $('.ujic-sc').hide();
-    
     // Init Clipboard
     var clipboard = new ClipboardJS('.ujibtn-sc-copy');
+    set_copy_enabled(false);
 
     // Init Notyf
-    var notyf = new Notyf({position: {x:'top',y:'top'}, duration: 228000, dismissible: true });
+    var notyf = new Notyf({position: {x:'top',y:'top'}, duration: 3500, dismissible: true });
 
-    // Init Datapicker
-    $('.ujic-date').find('.ujic_date_admin').datepicker({
-	dateFormat: 'yy/mm/dd',
+    $('.ujic-date-input').on('click', function() {
+        if ( typeof this.showPicker === 'function' ) {
+            try {
+                this.showPicker();
+            } catch ( error ) {}
+        }
     });
 	
     // Init Timer Type   
-    if ( $('input[name="ujic_type"]').is(':not(:checked)') ) {
+    if ( ! $('input[name="ujic_type"]:checked').length ) {
         $('.ujic_seltime').hide();
         $('.ujic-date').hide();
         $('.ujic-time').hide();
@@ -63,6 +64,10 @@ jQuery( function( $ ) {
     $('#ujic_exp_hide').on('ifUnchecked', function(event){
          $('#ujic_url').parent().show();
       });
+
+    $('#uji-shortcode').on('change input ifChanged ifChecked ifUnchecked', ':input', function() {
+        set_copy_enabled(false);
+    });
      
      
      
@@ -71,6 +76,7 @@ jQuery( function( $ ) {
 
     $('#uji-gen-shortcode').on('click', function(event){
         event.preventDefault();
+        set_copy_enabled(false);
         
         var errStart = true;
         
@@ -111,9 +117,9 @@ jQuery( function( $ ) {
         }
         
         if( errStart ) {
-            $('.ujic-sc').show();
-            notyf.success('Your shordcode has been created!');
+            notyf.success('Your shortcode has been created!');
             ujic_add_shortcode();
+            set_copy_enabled(true);
         }
         
     });
@@ -126,7 +132,7 @@ jQuery( function( $ ) {
         //Exp:
         //onetime
         if( $("input[name='ujic_exp_date']").val() && $("input[name='ujic_type']:checked").val() == 'onetime' ) {
-          var usc_exp_date = $("input[name='ujic_exp_date']").val();
+          var usc_exp_date = $("input[name='ujic_exp_date']").val().replace(/-/g, '/');
           var usc_exp_hh = $("select[name='ujic_hh']").val();
           var usc_exp_mm = $("select[name='ujic_mm']").val();
           
@@ -177,6 +183,10 @@ jQuery( function( $ ) {
         
         ujisc += ']';
         $('#ujic-scode').text(ujisc);
+    }
+
+    function set_copy_enabled(enabled) {
+        $('.ujibtn-sc-copy').prop('disabled', ! enabled).attr('aria-disabled', enabled ? 'false' : 'true');
     }
     
 });

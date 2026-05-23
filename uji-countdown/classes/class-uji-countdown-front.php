@@ -17,6 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class UjiCountdown extends Uji_Countdown {
 
 	/**
+	 * Countdown data printed in the footer for frontend scripts.
+	 *
+	 * @var array
+	 */
+	protected $valscript = array();
+
+	/**
 	 * Init vars
 	 *
 	 * @since     2.0
@@ -35,6 +42,8 @@ class UjiCountdown extends Uji_Countdown {
 			'ujic_thick'    => 'ujic_thick',
 			'ujic_txt'      => 'ujic_txt',
 			'ujic_ani'      => 'ujic_ani',
+			'ujic_no_box_color' => 'ujic_no_box_color',
+			'ujic_no_text_shadow' => 'ujic_no_text_shadow',
 			'ujic_d'        => 'ujic_d',
 			'ujic_h'        => 'ujic_h',
 			'ujic_m'        => 'ujic_m',
@@ -127,6 +136,16 @@ class UjiCountdown extends Uji_Countdown {
 			)
 		);
 
+		$id        = sanitize_text_field( $id );
+		$expire    = sanitize_text_field( $expire );
+		$timer     = sanitize_text_field( $timer );
+		$hide      = sanitize_text_field( $hide );
+		$url       = esc_url_raw( $url );
+		$subscr    = sanitize_text_field( $subscr );
+		$recurring = sanitize_text_field( $recurring );
+		$rectype   = sanitize_text_field( $rectype );
+		$repeats   = sanitize_text_field( $repeats );
+
 		// Increment counters
 		static $ujic_count = 0;
 		$ujic_count++;
@@ -207,6 +226,7 @@ class UjiCountdown extends Uji_Countdown {
 			$exp_days   = ! empty( $exp_d ) ? $exp_d : '2000';
 
 			$ujic_count = ( esc_attr( $uji_mc ) ) ? esc_attr ( $ujic_count ) : '';
+			$timer_settings = get_option( 'ujic_set', array() );
 
 			$this->valscript[ $ujic_count ] = array(
 				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
@@ -216,20 +236,20 @@ class UjiCountdown extends Uji_Countdown {
 				'expire'        => esc_attr ( $expire ),
 				'timer'         => esc_attr (  $timer ),
 				'exp_days'      => esc_attr (  $exp_days ),
-				'Years'         => ( $this->ujic_get_option( 'ujic_years' ) ) ? $this->ujic_get_option( 'ujic_years' ) : __( 'Years', 'ujicountdown' ),
-				'Year'          => ( $this->ujic_get_option( 'ujic_year' ) ) ? $this->ujic_get_option( 'ujic_year' ) : __( 'Year', 'ujicountdown' ),
-				'Months'        => ( $this->ujic_get_option( 'ujic_months' ) ) ? $this->ujic_get_option( 'ujic_months' ) : __( 'Months', 'ujicountdown' ),
-				'Month'         => ( $this->ujic_get_option( 'ujic_month' ) ) ? $this->ujic_get_option( 'ujic_month' ) : __( 'Month', 'ujicountdown' ),
-				'Weeks'         => ( $this->ujic_get_option( 'ujic_weeks' ) ) ? $this->ujic_get_option( 'ujic_weeks' ) : __( 'Weeks', 'ujicountdown' ),
-				'Week'          => ( $this->ujic_get_option( 'ujic_week' ) ) ? $this->ujic_get_option( 'ujic_week' ) : __( 'Week', 'ujicountdown' ),
-				'Days'          => ( $this->ujic_get_option( 'ujic_days' ) ) ? $this->ujic_get_option( 'ujic_days' ) : __( 'Days', 'ujicountdown' ),
-				'Day'           => ( $this->ujic_get_option( 'ujic_day' ) ) ? $this->ujic_get_option( 'ujic_day' ) : __( 'Day', 'ujicountdown' ),
-				'Hours'         => ( $this->ujic_get_option( 'ujic_hours' ) ) ? $this->ujic_get_option( 'ujic_hours' ) : __( 'Hours', 'ujicountdown' ),
-				'Hour'          => ( $this->ujic_get_option( 'ujic_hour' ) ) ? $this->ujic_get_option( 'ujic_hour' ) : __( 'Hour', 'ujicountdown' ),
-				'Minutes'       => ( $this->ujic_get_option( 'ujic_minutes' ) ) ? $this->ujic_get_option( 'ujic_minutes' ) : __( 'Minutes', 'ujicountdown' ),
-				'Minute'        => ( $this->ujic_get_option( 'ujic_minute' ) ) ? $this->ujic_get_option( 'ujic_minute' ) : __( 'Minute', 'ujicountdown' ),
-				'Seconds'       => ( $this->ujic_get_option( 'ujic_seconds' ) ) ? $this->ujic_get_option( 'ujic_seconds' ) : __( 'Seconds', 'ujicountdown' ),
-				'Second'        => ( $this->ujic_get_option( 'ujic_second' ) ) ? $this->ujic_get_option( 'ujic_second' ) : __( 'Second', 'ujicountdown' ),
+				'Years'         => ( $this->ujic_get_option( 'ujic_years', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_years', $timer_settings ) : __( 'Years', 'ujicountdown' ),
+				'Year'          => ( $this->ujic_get_option( 'ujic_year', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_year', $timer_settings ) : __( 'Year', 'ujicountdown' ),
+				'Months'        => ( $this->ujic_get_option( 'ujic_months', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_months', $timer_settings ) : __( 'Months', 'ujicountdown' ),
+				'Month'         => ( $this->ujic_get_option( 'ujic_month', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_month', $timer_settings ) : __( 'Month', 'ujicountdown' ),
+				'Weeks'         => ( $this->ujic_get_option( 'ujic_weeks', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_weeks', $timer_settings ) : __( 'Weeks', 'ujicountdown' ),
+				'Week'          => ( $this->ujic_get_option( 'ujic_week', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_week', $timer_settings ) : __( 'Week', 'ujicountdown' ),
+				'Days'          => ( $this->ujic_get_option( 'ujic_days', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_days', $timer_settings ) : __( 'Days', 'ujicountdown' ),
+				'Day'           => ( $this->ujic_get_option( 'ujic_day', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_day', $timer_settings ) : __( 'Day', 'ujicountdown' ),
+				'Hours'         => ( $this->ujic_get_option( 'ujic_hours', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_hours', $timer_settings ) : __( 'Hours', 'ujicountdown' ),
+				'Hour'          => ( $this->ujic_get_option( 'ujic_hour', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_hour', $timer_settings ) : __( 'Hour', 'ujicountdown' ),
+				'Minutes'       => ( $this->ujic_get_option( 'ujic_minutes', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_minutes', $timer_settings ) : __( 'Minutes', 'ujicountdown' ),
+				'Minute'        => ( $this->ujic_get_option( 'ujic_minute', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_minute', $timer_settings ) : __( 'Minute', 'ujicountdown' ),
+				'Seconds'       => ( $this->ujic_get_option( 'ujic_seconds', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_seconds', $timer_settings ) : __( 'Seconds', 'ujicountdown' ),
+				'Second'        => ( $this->ujic_get_option( 'ujic_second', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_second', $timer_settings ) : __( 'Second', 'ujicountdown' ),
 				'ujic_txt_size' => esc_attr ( $ujic_txt_size ),
 				'ujic_thick'    => esc_attr ( $ujic_thick ),
 				'ujic_col_dw'   => esc_attr ( $ujic_col_dw ),
@@ -240,6 +260,8 @@ class UjiCountdown extends Uji_Countdown {
 				'ujic_lab_sz'   => esc_attr ( $ujic_lab_sz ),
 				'ujic_txt'      => esc_attr ( $ujic_txt ),
 				'ujic_ani'      => esc_attr ( $ujic_ani ),
+				'ujic_no_box_color' => esc_attr ( $ujic_no_box_color ),
+				'ujic_no_text_shadow' => esc_attr ( $ujic_no_text_shadow ),
 				'ujic_url'      => esc_url ( $url ),
 				'ujic_goof'     => esc_attr ( $ujic_goof ),
 				'uji_center'    => esc_attr ( $classh ),
@@ -252,8 +274,8 @@ class UjiCountdown extends Uji_Countdown {
 				'ujic_w'        => esc_attr ( $ujic_w ), // Secondary format: Weeks
 				'uji_time'      => date_i18n( 'M j, Y H:i:s' ) . '+0000',
 				'uji_hide'      => ( $hide == 'true' ) ? 'true' : 'false',
-				'ujic_rtl'      => ( $this->ujic_get_option( 'ujic_rtl' ) ) ? $this->ujic_get_option( 'ujic_rtl' ) : false,
-				'uji_utime'     => ( $this->ujic_get_option( 'ujic_utime' ) ) ? $this->ujic_get_option( 'ujic_utime' ) : false,
+				'ujic_rtl'      => ( $this->ujic_get_option( 'ujic_rtl', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_rtl', $timer_settings ) : false,
+				'uji_utime'     => ( $this->ujic_get_option( 'ujic_utime', $timer_settings ) ) ? $this->ujic_get_option( 'ujic_utime', $timer_settings ) : false,
 			);
 
 			// ExtendStyle
@@ -291,5 +313,3 @@ class UjiCountdown extends Uji_Countdown {
 
 
 }
-
-

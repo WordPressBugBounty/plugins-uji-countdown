@@ -1,0 +1,17 @@
+{
+	"$schema": "https://json.schemastore.org/block.json",
+	"apiVersion": 2,
+	"name": "ujimoto/countdown",
+	"version": "2.3.4",
+	"title": "Uji countdown",
+	"category": "plugin",
+	"icon": "smiley",
+	"description": "Customizable countdown",
+	"supports": {
+		"html": false
+	},
+	"textdomain": "ujicountdown",
+	"editorScript": "file:./dist/blocks.build.js",
+	"editorStyle": "file:./dist/blocks.editor.build.css",
+	"style": "file:./dist/blocks.style.build.css"
+}

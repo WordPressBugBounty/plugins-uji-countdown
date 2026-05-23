@@ -63,11 +63,11 @@ class ujic_Widget extends WP_Widget {
       $table_name = $wpdb->prefix . "uji_counter";
       $ujic_datas = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY `time` DESC" );
       if ( !empty( $ujic_datas ) ) {
-         $ujictab = false;
+         $ujictab = '';
          foreach ( $ujic_datas as $ujic ) {
             $type = !empty( $ujic->style ) ? $ujic->style : "classic";
             $select = (isset( $sel ) && !empty( $sel ) && $sel == $ujic->title ) ? ' selected="selected"' : '';
-            $ujictab .='<option value="' . $ujic->title . '" data-type=' . $type . ' ' . $select . '> ' . $ujic->title . ' - ' . $type . ' </option>';
+            $ujictab .='<option value="' . esc_attr( $ujic->title ) . '" data-type=' . esc_attr( $type ) . ' ' . $select . '> ' . esc_html( $ujic->title ) . ' - ' . esc_html( $type ) . ' </option>';
          }
          return $ujictab;
       } else {
@@ -84,6 +84,7 @@ class ujic_Widget extends WP_Widget {
      */
    public function ujic_times( $sel = NULL ) {
         $times = array('second'=> 'Second(s)', 'minute'=> 'Minute(s)', 'hour'=> 'Hour(s)', 'day'=> 'Day(s)', 'week'=> 'Week(s)', 'month'=> 'Month(s)');
+        $output = '';
         
         foreach ( $times as $value => $option ) {
             $select = (isset( $sel ) && !empty( $sel ) && $sel == $value ) ? ' selected="selected"' : '';
@@ -100,10 +101,11 @@ class ujic_Widget extends WP_Widget {
      * @var     string
      */
    public function ujic_sel_datetime( $nr, $sel = null ) {
+      $num = array();
       for ( $i = 0; $i <= $nr; $i++ ) {
          $num[sprintf( "%02s", $i )] = sprintf( "%02s", $i );
       }
-      $numbers = false;
+      $numbers = '';
       foreach ( $num as $n ) {
          $select = (isset( $sel ) && !empty( $sel ) && $sel == $n) ? ' selected="selected"' : '';
          $numbers .='<option value="' . $n . '"' . $select . '> ' . $n . ' </option>';
@@ -123,7 +125,7 @@ class ujic_Widget extends WP_Widget {
       extract( $args, EXTR_SKIP );
 
       /* Our variables from the widget settings. */
-      $title = apply_filters( 'widget_UJI_title', $instance['UJI_title'], $instance, $this->id_base );
+      $title = apply_filters( 'widget_UJI_title', $instance['UJI_title'] ?? '', $instance, $this->id_base );
       $name = isset( $instance['UJI_style'] ) ? $instance['UJI_style'] : false;
       $date = isset( $instance['UJI_date'] ) ? $instance['UJI_date'] : false;
       $hour = isset( $instance['UJI_hours'] ) ? $instance['UJI_hours'] : false;
@@ -176,22 +178,22 @@ class ujic_Widget extends WP_Widget {
      */
    public function update( $new_instance, $old_instance ) {
       $instance = $old_instance;
-      $instance['UJI_title'] = strip_tags( $new_instance['UJI_title'] );
-      $instance['UJI_style'] = strip_tags( $new_instance['UJI_style'] );
-      $instance['UJI_date'] = strip_tags( $new_instance['UJI_date'] );
-      $instance['UJI_hours'] = strip_tags( $new_instance['UJI_hours'] );
-      $instance['UJI_minutes'] = strip_tags( $new_instance['UJI_minutes'] );
-      $instance['UJI_hide'] = strip_tags( $new_instance['UJI_hide'] );
-      $instance['UJI_url'] = strip_tags( $new_instance['UJI_url'] );
-      $instance['UJI_subscr'] = strip_tags( $new_instance['UJI_subscr'] );
-      $instance['UJI_recurring'] = strip_tags( $new_instance['UJI_recurring'] );
-      $instance['UJI_rectype'] = strip_tags( $new_instance['UJI_rectype'] );
-      $instance['UJI_repeats'] = strip_tags( $new_instance['UJI_repeats'] );
-      
-      $instance['UJI_type'] = strip_tags( $new_instance['UJI_type'] );
-      $instance['UJI_thou'] = strip_tags( $new_instance['UJI_thou'] );
-      $instance['UJI_tmin'] = strip_tags( $new_instance['UJI_tmin'] );
-      $instance['UJI_tsec'] = strip_tags( $new_instance['UJI_tsec'] );
+      $instance['UJI_title'] = sanitize_text_field( $new_instance['UJI_title'] ?? '' );
+      $instance['UJI_style'] = sanitize_text_field( $new_instance['UJI_style'] ?? '' );
+      $instance['UJI_date'] = sanitize_text_field( $new_instance['UJI_date'] ?? '' );
+      $instance['UJI_hours'] = sanitize_text_field( $new_instance['UJI_hours'] ?? '' );
+      $instance['UJI_minutes'] = sanitize_text_field( $new_instance['UJI_minutes'] ?? '' );
+      $instance['UJI_hide'] = sanitize_text_field( $new_instance['UJI_hide'] ?? '' );
+      $instance['UJI_url'] = esc_url_raw( $new_instance['UJI_url'] ?? '' );
+      $instance['UJI_subscr'] = sanitize_text_field( $new_instance['UJI_subscr'] ?? '' );
+      $instance['UJI_recurring'] = sanitize_text_field( $new_instance['UJI_recurring'] ?? '' );
+      $instance['UJI_rectype'] = sanitize_text_field( $new_instance['UJI_rectype'] ?? '' );
+      $instance['UJI_repeats'] = sanitize_text_field( $new_instance['UJI_repeats'] ?? '' );
+
+      $instance['UJI_type'] = sanitize_text_field( $new_instance['UJI_type'] ?? '' );
+      $instance['UJI_thou'] = sanitize_text_field( $new_instance['UJI_thou'] ?? '' );
+      $instance['UJI_tmin'] = sanitize_text_field( $new_instance['UJI_tmin'] ?? '' );
+      $instance['UJI_tsec'] = sanitize_text_field( $new_instance['UJI_tsec'] ?? '' );
       
 
       return $instance;
@@ -226,7 +228,7 @@ class ujic_Widget extends WP_Widget {
 
       $instance = wp_parse_args( (array) $instance, $defaults );
       
-      if ( 'Uji Countdown Pro' !== UJIC_NAME ):          
+      if ( ! ujic_is_pro_active() ):
       ?>
 
       <div style="font-size:11px">
@@ -238,7 +240,7 @@ class ujic_Widget extends WP_Widget {
       <!-- Widget Title: Text Input -->
       <div>
          <label for="<?php echo $this->get_field_id( 'UJI_title' ); ?>"><?php _e( 'Title (optional):', 'ujicountdown' ); ?></label>
-         <input type="text" name="<?php echo $this->get_field_name( 'UJI_title' ); ?>"  value="<?php echo $instance['UJI_title']; ?>" class="widefat" id="<?php echo $this->get_field_id( 'UJI_title' ); ?>" />
+         <input type="text" name="<?php echo $this->get_field_name( 'UJI_title' ); ?>"  value="<?php echo esc_attr( $instance['UJI_title'] ); ?>" class="widefat" id="<?php echo $this->get_field_id( 'UJI_title' ); ?>" />
       </div>
 
       <!-- Widget Select Style: Select Input -->
@@ -272,15 +274,15 @@ class ujic_Widget extends WP_Widget {
        <!-- Widget Date: Text Input -->
       <div class="ujict_rep" <?php if ($instance['UJI_type'] == 'ujic_type_one') echo ' style="display:none"'; ?>>
           <label style="display:block"><?php _e( 'Select Time:', 'ujicountdown' ); ?></label>
-          <input type="text" name="<?php echo $this->get_field_name( 'UJI_thou' ); ?>"  value="<?php echo $instance['UJI_thou']; ?>" placeholder="Hours" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_thou' ); ?>" />
-         <input type="text" name="<?php echo $this->get_field_name( 'UJI_tmin' ); ?>"  value="<?php echo $instance['UJI_tmin']; ?>"  placeholder="Minutes" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_tmin' ); ?>" />
-         <input type="text" name="<?php echo $this->get_field_name( 'UJI_tsec' ); ?>"  value="<?php echo $instance['UJI_tsec']; ?>"  placeholder="Seconds" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_tsec' ); ?>" />
+          <input type="text" name="<?php echo $this->get_field_name( 'UJI_thou' ); ?>"  value="<?php echo esc_attr( $instance['UJI_thou'] ); ?>" placeholder="Hours" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_thou' ); ?>" />
+         <input type="text" name="<?php echo $this->get_field_name( 'UJI_tmin' ); ?>"  value="<?php echo esc_attr( $instance['UJI_tmin'] ); ?>"  placeholder="Minutes" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_tmin' ); ?>" />
+         <input type="text" name="<?php echo $this->get_field_name( 'UJI_tsec' ); ?>"  value="<?php echo esc_attr( $instance['UJI_tsec'] ); ?>"  placeholder="Seconds" class="small-text" style="min-width: 80px;" id="<?php echo $this->get_field_id( 'UJI_tsec' ); ?>" />
       </div>
 
       <!-- Widget Date: Text Input -->
       <div class="ujict_one" <?php if ($instance['UJI_type'] == 'ujic_type_rep') echo ' style="display:none"'; ?>>
          <label for="<?php echo $this->get_field_id( 'UJI_date' ); ?>"><?php _e( 'Expire Date:', 'ujicountdown' ); ?></label>
-         <input type="text" name="<?php echo $this->get_field_name( 'UJI_date' ); ?>"  value="<?php echo $instance['UJI_date']; ?>"  style="background: url('<?php echo UJICOUNTDOWN_URL ?>/assets/images/data-picker.png') no-repeat scroll right top; display:block; width: 100%;" class="widefat ujic_date" id="<?php echo $this->get_field_id( 'UJI_date' ); ?>" />
+         <input type="text" name="<?php echo $this->get_field_name( 'UJI_date' ); ?>"  value="<?php echo esc_attr( $instance['UJI_date'] ); ?>"  style="background: url('<?php echo UJICOUNTDOWN_URL ?>/assets/images/data-picker.png') no-repeat scroll right top; display:block; width: 100%;" class="widefat ujic_date" id="<?php echo $this->get_field_id( 'UJI_date' ); ?>" />
       </div>
 
       <!-- Widget Select Time: Select Input -->
@@ -317,21 +319,21 @@ class ujic_Widget extends WP_Widget {
       <div>
          <label for="<?php echo $this->get_field_id( 'UJI_url' ); ?>"><?php _e( 'Or go to this link:', 'ujicountdown' ); ?></label><br />
          <small><?php _e( 'Select URL to send after expire', 'ujicountdown' ); ?></small>
-         <input class="widefat ujic_link" id="<?php echo $this->get_field_id( 'UJI_url' ); ?>" name="<?php echo $this->get_field_name( 'UJI_url' ); ?>" type="text" value="<?php echo $instance['UJI_url']; ?>" />
+         <input class="widefat ujic_link" id="<?php echo $this->get_field_id( 'UJI_url' ); ?>" name="<?php echo $this->get_field_name( 'UJI_url' ); ?>" type="text" value="<?php echo esc_url( $instance['UJI_url'] ); ?>" />
       </div>
       
       <!-- Widget Select Reccuring Time -->
       <h4><?php _e( 'Reccuring Time:', 'ujicountdown' ); ?> </h4>
       
       <div style="display:block; float: none;">
-        <span style="float:left; display: block; line-height: 28px; min-width: 55px; margin-right: 4px;"><?php _e( 'Every:', 'ujicountdown' ); ?> </span><input class="small-text" style="float:left; padding: 3px 5px;" id="<?php echo $this->get_field_id( 'UJI_recurring' ); ?>" name="<?php echo $this->get_field_name( 'UJI_recurring' ); ?>" type="text" value="<?php echo $instance['UJI_recurring']; ?>" />
+        <span style="float:left; display: block; line-height: 28px; min-width: 55px; margin-right: 4px;"><?php _e( 'Every:', 'ujicountdown' ); ?> </span><input class="small-text" style="float:left; padding: 3px 5px;" id="<?php echo $this->get_field_id( 'UJI_recurring' ); ?>" name="<?php echo $this->get_field_name( 'UJI_recurring' ); ?>" type="text" value="<?php echo esc_attr( $instance['UJI_recurring'] ); ?>" />
         <select name="<?php echo $this->get_field_name( 'UJI_rectype' ); ?>" id="<?php echo $this->get_field_id( 'UJI_rectype' ); ?>">
         <?php
              echo $this->ujic_times($instance['UJI_rectype']);
         ?>
         </select>
         <div style="display:block; float: none;">
-            <span style="float:left; display: block; line-height: 28px; min-width: 55px; margin-right: 4px;"><?php _e( 'Repeats:', 'ujicountdown' ); ?> </span><input class="small-text" style="float:left; padding: 3px 5px;" id="<?php echo $this->get_field_id( 'UJI_repeats' ); ?>" name="<?php echo $this->get_field_name( 'UJI_repeats' ); ?>" type="text" value="<?php echo $instance['UJI_repeats']; ?>" />
+            <span style="float:left; display: block; line-height: 28px; min-width: 55px; margin-right: 4px;"><?php _e( 'Repeats:', 'ujicountdown' ); ?> </span><input class="small-text" style="float:left; padding: 3px 5px;" id="<?php echo $this->get_field_id( 'UJI_repeats' ); ?>" name="<?php echo $this->get_field_name( 'UJI_repeats' ); ?>" type="text" value="<?php echo esc_attr( $instance['UJI_repeats'] ); ?>" />
             <span style="display: inline-block; line-height: 28px; margin-left: 4px;"> <?php _e( 'leave it empty for unlimited', 'ujicountdown' ); ?> </span>
         </div>
       </div>
@@ -343,7 +345,7 @@ class ujic_Widget extends WP_Widget {
        <h4><?php _e( 'Subscription:', 'ujicountdown' ); ?> </h4>
       <div>
          <label for="<?php echo $this->get_field_id( 'UJI_subscr' ); ?>"><?php _e( 'Campaign Name:', 'ujicountdown' ); ?></label><br />
-         <input class="widefat ujic_subscr" id="<?php echo $this->get_field_id( 'UJI_subscr' ); ?>" name="<?php echo $this->get_field_name( 'UJI_subscr' ); ?>" type="text" value="<?php echo $instance['UJI_subscr']; ?>" />
+         <input class="widefat ujic_subscr" id="<?php echo $this->get_field_id( 'UJI_subscr' ); ?>" name="<?php echo $this->get_field_name( 'UJI_subscr' ); ?>" type="text" value="<?php echo esc_attr( $instance['UJI_subscr'] ); ?>" />
       </div>
       
       <?php endif; ?>

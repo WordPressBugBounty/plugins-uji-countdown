@@ -33,6 +33,37 @@ function ujic_esc_json( $json, $html = false ) {
 	);
 }
 
+/**
+ * Check whether the premium extension is loaded at runtime.
+ */
+function ujic_is_pro_active() {
+	return ( defined( 'UJIC_NAMEPRO' ) && 'Uji Countdown Pro' === UJIC_NAMEPRO )
+		|| defined( 'UJICOUNTDOWNPRO' )
+		|| class_exists( 'Uji_Countdown_Pro' );
+}
+
+/**
+ * Return the plugin display name for the active free/pro combination.
+ */
+function ujic_plugin_name() {
+	if ( ujic_is_pro_active() && defined( 'UJIC_NAMEPRO' ) ) {
+		return UJIC_NAMEPRO;
+	}
+
+	return defined( 'UJIC_NAME' ) ? UJIC_NAME : 'Uji Countdown';
+}
+
+/**
+ * Return the plugin display version for the active free/pro combination.
+ */
+function ujic_plugin_version() {
+	if ( ujic_is_pro_active() && defined( 'UJIC_VERSPRO' ) ) {
+		return UJIC_VERSPRO;
+	}
+
+	return defined( 'UJIC_VERS' ) ? UJIC_VERS : '';
+}
+
 function ujic_styles_get( $first = '') {
         global $wpdb;
         $ujic_styles = $wpdb->get_results( "SELECT style, title, link FROM " . $wpdb->prefix . "uji_counter ORDER BY `time` DESC" );

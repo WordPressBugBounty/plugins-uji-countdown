@@ -3,7 +3,7 @@
 Plugin Name: Uji Countdown
 Plugin URI: http://www.wpmanage.com/uji-countdown
 Description: Customizable Countdown.
-Version: 2.3.4
+Version: 3.0
 Text Domain: ujicountdown
 Domain Path: /lang
 Author: Wpmanage.com
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 defined( 'WPINC' ) || exit;
 
 define( 'UJIC_NAME', defined('UJIC_NAMEPRO') ? UJIC_NAMEPRO : 'Uji Countdown' );
-define( 'UJIC_ORIG', '2.3.4' );
+define( 'UJIC_ORIG', '3.0' );
 define( 'UJIC_VERS', defined('UJIC_VERSPRO') ? UJIC_VERSPRO : UJIC_ORIG  );
 define( 'UJIC_FOLD', 'uji-countdown' );
 define( 'UJICOUNTDOWN', trailingslashit( dirname(__FILE__) ) );

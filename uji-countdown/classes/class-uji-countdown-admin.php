@@ -17,6 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Uji_Countdown_Admin {
 
 		/**
+		 * Deferred admin messages.
+		 *
+		 * @since   2.3.4
+		 *
+		 * @var     array
+		 */
+	private $ujic_admin_messages = array();
+
+		/**
 		 * Styles
 		 *
 		 * @since   2.1
@@ -52,6 +61,41 @@ class Uji_Countdown_Admin {
 	}
 
 		/**
+		 * Keep legacy Pro label sources visually aligned with the refreshed admin UI.
+		 *
+		 * @since 2.2
+		 */
+	public function ujic_admin_label_text( $translated, $text, $domain ) {
+		if ( 'ujicountdown' !== $domain || ! is_admin() ) {
+			return $translated;
+		}
+
+		$label_map = array(
+			'Select Style'       => 'Choose Style',
+			'Select Style:'      => 'Choose Style:',
+			'Main format:'       => 'Primary Units:',
+			'Main Format:'       => 'Primary Units:',
+			'Secondary format:'  => 'Additional Units:',
+			'Secondary Format:'  => 'Additional Units:',
+			'Ring Progress'      => 'Progress Fill',
+			'Ring Progress:'     => 'Progress Fill:',
+			'Line Color'         => 'Ring Colors',
+			'Line Color:'        => 'Ring Colors:',
+			'Select Line Color:' => 'Ring Colors:',
+			'Thickness'          => 'Ring Thickness',
+			'Thickness:'         => 'Ring Thickness:',
+			'Timer Size:'        => 'Counter Size:',
+			'Save Timer Style'   => 'Save Style',
+		);
+
+		if ( isset( $label_map[ $text ] ) ) {
+			return $label_map[ $text ];
+		}
+
+		return $translated;
+	}
+
+		/**
 		 * Print template of table counters.
 		 *
 		 * @since    2.0
@@ -60,39 +104,43 @@ class Uji_Countdown_Admin {
 			$this->cform_delete();
 
 		if ( $this->saved_db_style() ) {
+				global $wpdb;
+
+				$style_count = absint( $wpdb->get_var( 'SELECT COUNT(*) FROM ' . $this->ujic_tab_name() ) );
+				$count_label = sprintf(
+					_n( '%s style', '%s styles', $style_count, 'ujicountdown' ),
+					number_format_i18n( $style_count )
+				);
 
 				$table_headers = '
             	<th class="manage-column" scope="col"><span>' . __( 'Created On', 'ujicountdown' ) . '</span></th>
             	<th class="manage-column" scope="col"><span>' . __( 'Name', 'ujicountdown' ) . '</span></th>
           		<th class="manage-column" scope="col"><span>' . __( 'Style', 'ujicountdown' ) . '</span></th>
-				<th class="manage-column" scope="col"><span>' . __( 'Change', 'ujicountdown' ) . '</span></th>';
+				<th class="manage-column" scope="col"><span>' . __( 'Actions', 'ujicountdown' ) . '</span></th>';
 
-				echo '<div id="ujic_table" class="list">
-				<a href="?page=ujicountdown&tab=tab_ujic_new" class="button button-primary" id="ujic_table_new">' . __( 'Create a New Timer Style', 'ujicountdown' ) . '</a>
-                                <a href="?page=ujicountdown&tab=tab_ujic_shortcode" class="button button-secondary" id="ujic_table_new">' . __( 'Generate ShortCode', 'ujicountdown' ) . '</a>
-	            <table cellspacing="0" class="widefat fixed">
+				echo '<div id="ujic_table" class="list ujic-list-card">
+				<div class="ujic-list-header">
+					<h2><span class="ujic-list-dot" aria-hidden="true"></span>' . esc_html__( 'Your Timer Styles', 'ujicountdown' ) . '</h2>
+					<span class="ujic-list-count">' . esc_html( $count_label ) . '</span>
+				</div>
+				<div class="ujic-list-toolbar">
+					<a href="?page=ujicountdown&tab=tab_ujic_new" class="button button-primary ujic-list-primary"><i class="dashicons dashicons-plus ujic-list-button-icon" aria-hidden="true"></i>' . esc_html__( 'Create a New Timer Style', 'ujicountdown' ) . '</a>
+					<a href="?page=ujicountdown&tab=tab_ujic_shortcode" class="button button-secondary ujic-list-secondary"><i class="dashicons dashicons-shortcode ujic-list-button-icon" aria-hidden="true"></i>' . esc_html__( 'Generate ShortCode', 'ujicountdown' ) . '</a>
+				</div>
+	            <table cellspacing="0" class="widefat fixed ujic-list-table">
                     <thead>
                         <tr>
 							' . wp_kses_post( $table_headers ) . '
 						</tr>
                     </thead>
-                    <tfoot>
-                        <tr>
-                            ' . $table_headers . '
-                        </tr>
-                    </tfoot>
-
                     <tbody>
 						' . $this->ujic_tabs_values() . '
-					<tbody>
+					</tbody>
 				</table>
 				</div>';
 
-			if ( ! $this->ujic_pro() ) {
-				$this->pro_metaboxes();
-			}
 		} else {
-				$introLayout  = '<div id="ujic_new"><h1>Uji Countdown ' . esc_attr( UJIC_VERS ) . '</h1><h4>The most customizable countdown plugin for WordPress</h4>';
+				$introLayout  = '<div id="ujic_new"><h1>' . esc_html( ujic_plugin_name() . ' ' . ujic_plugin_version() ) . '</h1><h4>The most customizable countdown plugin for WordPress</h4>';
 				$introLayout .= '<a href="?page=ujicountdown&tab=tab_ujic_new" class="ujic_butnew" id="ujic_table_new">' . __( 'Add New Style', 'ujicountdown' ) . '</a>';
 				$introLayout .= '<div class="ujic_new_cnt"><h2>WHAT\'S NEW</h2>';
 				$introLayout .= '<ul>
@@ -150,10 +198,6 @@ class Uji_Countdown_Admin {
 				$introLayout .= '</div></div>';
 
 				echo $introLayout;
-
-			if ( ! $this->ujic_pro() ) {
-					$this->pro_metaboxes();
-			}
 		}
 
 	}
@@ -165,20 +209,40 @@ class Uji_Countdown_Admin {
 		 */
 	public function admin_shortcode() {
 			// ID
-			$cur_id = ( $this->cform_is_edit() ) ? ujic_clean( wp_unslash( $_GET['edit'] ) ) : '';
+			$cur_id = ( $this->cform_is_edit() ) ? $this->ujic_request_id( 'edit' ) : '';
 
 			// Get vars
 			$vars = $this->ujic_option( $cur_id );
 
 			// Curent style
-			$cur_style = ( $this->cform_is_edit() ) ? $vars['ujic_style'] : ( ( isset( $_GET['style'] ) && ! empty( $_GET['style'] ) ) ?  ujic_clean( wp_unslash( $_GET['style'] ) ) : 'classic' );
+			$cur_style = ( $this->cform_is_edit() ) ? $vars['ujic_style'] : $this->ujic_request_text( 'style', 'classic' );
+
+			$saved_styles = ujic_styles_get( 'Select saved style' );
+
+		if ( empty( $saved_styles ) ) {
+				$add_style_url = add_query_arg(
+					array(
+						'page' => 'ujicountdown',
+						'tab'  => 'tab_ujic_new',
+					),
+					admin_url( 'options-general.php' )
+				);
+
+				$cnt  = '<p>' . esc_html( __( 'Create a Counter Style before generating a shortcode.', 'ujicountdown' ) ) . '</p>';
+				$cnt .= '<p><a href="' . esc_url( $add_style_url ) . '" class="button button-primary">' . esc_html( __( 'Create Counter Style', 'ujicountdown' ) ) . '</a></p>';
+
+				echo $this->custom_metabox( __( 'Generate Shortcode', 'ujicountdown' ), $cnt, 'ujic-create' );
+				return;
+		}
+
+			$this->sc_metaboxes( $cur_style, $vars );
 
 			$cnt = '<form id="uji-shortcode">';
 			// Style
-			$cnt .= $this->cform_select( __( 'Select Style:', 'ujicountdown' ), 'ujic_style', ujic_styles_get( 'Select saved style' ), '' );
+			$cnt .= $this->cform_select( __( 'Choose Style:', 'ujicountdown' ), 'ujic_style', $saved_styles, '' );
 			// Timer Type:
 			$vars['ujic_type'] = array( 'onetime', 'repeat' );
-			$cnt              .= $this->cform_radiobox( __( 'Timer Type:', 'ujicountdown' ), 'ujic_type', array( __( 'One Time Timer', 'ujicountdown' ), __( 'Repeating Timer', 'ujicountdown' ) ), $vars['ujic_type'], '' );
+			$cnt              .= $this->cform_radiobox( __( 'Timer Type:', 'ujicountdown' ), 'ujic_type', array( __( 'One Time Timer', 'ujicountdown' ), __( 'Repeating Timer', 'ujicountdown' ) ), $vars['ujic_type'], 'onetime' );
 			// Expiration Date and Time:
 			$cnt .= $this->cform_date( __( 'Expiration Date:', 'ujicountdown' ), 'ujic_exp_date' );
 			// Expiration Date and Time select HH:MM
@@ -198,8 +262,8 @@ class Uji_Countdown_Admin {
 				$cnt .= $this->cform_input( __( 'Campaign Name:', 'ujicountdown' ), 'ujic_camp', '' );
 		}
 
-			$cnt .= '<div>
-                        <button class="button button-primary" id="uji-gen-shortcode">
+			$cnt .= '<div class="ujic-shortcode-actions ujic-submit-hold">
+                        <button type="button" class="button button-primary" id="uji-gen-shortcode">
                                 Generate Shortcode
                          </button>
                  </div>';
@@ -207,9 +271,6 @@ class Uji_Countdown_Admin {
 			$cnt .= '</form>';
 
 			echo $this->custom_metabox( __( 'Generate Shortcode', 'ujicountdown' ), $cnt, 'ujic-create' );
-
-			// Preview Metaboxes
-			$this->sc_metaboxes( $cur_style, $vars );
 	}
 
 		/**
@@ -222,13 +283,13 @@ class Uji_Countdown_Admin {
 			$this->cform_save_db();
 
 			// ID
-			$cur_id = ( $this->cform_is_edit() ) ? ujic_clean( wp_unslash( $_GET['edit'] ) ) : '';
+			$cur_id = ( $this->cform_is_edit() ) ? $this->ujic_request_id( 'edit' ) : '';
 
 			// Get vars
 			$vars = $this->ujic_option( $cur_id );
 
 			// Curent style
-			$cur_style = ( $this->cform_is_edit() ) ? $vars['ujic_style'] : ( ( isset( $_GET['style'] ) && ! empty( $_GET['style'] ) ) ? ujic_clean( wp_unslash( $_GET['style'] ) ) : 'classic' );
+			$cur_style = ( $this->cform_is_edit() ) ? $vars['ujic_style'] : $this->ujic_request_text( 'style', 'classic' );
 
 			// Build Forms
 			// $cnt = '<form method="post" action="page=ujicountdown&tab=tab_ujic_new&style=' . $cur_style . '&save=true">';
@@ -238,23 +299,29 @@ class Uji_Countdown_Admin {
 			$cnt .= $this->cform_input( __( 'Timer Title:', 'ujicountdown' ), 'ujic_name', $vars['ujic_name'] );
 			$cnt .= $this->cform_select( __( 'Google Font:', 'ujicountdown' ), 'ujic_goof', ujic_googlefonts(), $vars['ujic_goof'] );
 			$cnt .= $this->cform_radiobox( __( 'Alignment:', 'ujicountdown' ), 'ujic_pos', array( __( 'None', 'ujicountdown' ), __( 'Left', 'ujicountdown' ), __( 'Center', 'ujicountdown' ), __( 'Right', 'ujicountdown' ) ), array( 'none', 'left', 'center', 'right' ), $vars['ujic_pos'] );
-			$cnt .= $this->cform_checkbox( __( 'Main format:', 'ujicountdown' ), array( 'ujic_d', 'ujic_h', 'ujic_m', 'ujic_s' ), array( __( 'Days', 'ujicountdown' ), __( 'Hours', 'ujicountdown' ), __( 'Minutes', 'ujicountdown' ), __( 'Seconds', 'ujicountdown' ) ), array( $vars['ujic_d'], $vars['ujic_h'], $vars['ujic_m'], $vars['ujic_s'] ) );
-			$cnt .= $this->cform_checkbox( __( 'Secondary format:', 'ujicountdown' ), array( 'ujic_y', 'ujic_o', 'ujic_w' ), array( __( 'Years', 'ujicountdown' ), __( 'Months', 'ujicountdown' ), __( 'Weeks', 'ujicountdown' ) ), array( $vars['ujic_y'], $vars['ujic_o'], $vars['ujic_w'] ) );
+			$cnt .= $this->cform_checkbox( __( 'Primary Units:', 'ujicountdown' ), array( 'ujic_d', 'ujic_h', 'ujic_m', 'ujic_s' ), array( __( 'Days', 'ujicountdown' ), __( 'Hours', 'ujicountdown' ), __( 'Minutes', 'ujicountdown' ), __( 'Seconds', 'ujicountdown' ) ), array( $vars['ujic_d'], $vars['ujic_h'], $vars['ujic_m'], $vars['ujic_s'] ) );
+			$cnt .= $this->cform_checkbox( __( 'Additional Units:', 'ujicountdown' ), array( 'ujic_y', 'ujic_o', 'ujic_w' ), array( __( 'Years', 'ujicountdown' ), __( 'Months', 'ujicountdown' ), __( 'Weeks', 'ujicountdown' ) ), array( $vars['ujic_y'], $vars['ujic_o'], $vars['ujic_w'] ) );
 
 			// Filter for new options
 		if ( has_filter( 'ujic_admin_add_circform' ) ) {
 				$cnt .= apply_filters( 'ujic_admin_add_circform', $cnt, $vars, $cur_style );
 		}
 
-			$cnt .= $this->cform_checkbox( __( 'Display time label text:', 'ujicountdown' ), array( 'ujic_txt' ), array( '' ), array( $vars['ujic_txt'] ) );
+			$cnt .= $this->cform_checkbox( __( 'Show Time Labels:', 'ujicountdown' ), array( 'ujic_txt' ), array( '' ), array( $vars['ujic_txt'] ) );
+			$cnt .= '<input type="hidden" name="ujic_ani" value="false">';
+			$cnt .= $this->cform_checkbox( __( 'Number Animation:', 'ujicountdown' ), array( 'ujic_ani' ), array( __( 'Animate number changes', 'ujicountdown' ) ), array( $vars['ujic_ani'] ) );
 		if ( $cur_style == 'classic' ) {
-				$cnt .= $this->cform_sliderui( __( 'Timer Size:', 'ujicountdown' ), 'ujic_size', $vars['ujic_size'], 10, 80, 1 );
+				$cnt .= $this->cform_sliderui( __( 'Counter Size:', 'ujicountdown' ), 'ujic_size', $vars['ujic_size'], 10, 80, 1 );
 		}
 		if ( $cur_style == 'classic' ) {
-				$cnt .= $this->cform_color( __( 'Select Box Color:', 'ujicountdown' ), array( 'ujic_col_dw', 'ujic_col_up' ), array( __( 'Bottom', 'ujicountdown' ), __( 'Up', 'ujicountdown' ) ), array( $vars['ujic_col_dw'], $vars['ujic_col_up'] ) );
+				$cnt .= '<input type="hidden" name="ujic_no_box_color" value="false">';
+				$cnt .= $this->cform_checkbox( __( 'Disable Box Color:', 'ujicountdown' ), array( 'ujic_no_box_color' ), array( __( 'Transparent background', 'ujicountdown' ) ), array( $vars['ujic_no_box_color'] ) );
+				$cnt .= $this->cform_color( __( 'Select Box Color:', 'ujicountdown' ), array( 'ujic_col_dw', 'ujic_col_up' ), array( __( 'Bottom', 'ujicountdown' ), __( 'Up', 'ujicountdown' ) ), array( $vars['ujic_col_dw'], $vars['ujic_col_up'] ), 'ujic-box-color-setting' );
 		}
 		if ( $cur_style == 'classic' ) {
 				$cnt .= $this->cform_color( __( 'Text Color:', 'ujicountdown' ), array( 'ujic_col_txt', 'ujic_col_sw' ), array( __( 'Number Color', 'ujicountdown' ), __( 'Shadow Color', 'ujicountdown' ) ), array( $vars['ujic_col_txt'], $vars['ujic_col_sw'] ) );
+				$cnt .= '<input type="hidden" name="ujic_no_text_shadow" value="false">';
+				$cnt .= $this->cform_checkbox( __( 'Shadow Transparency:', 'ujicountdown' ), array( 'ujic_no_text_shadow' ), array( __( 'Transparent shadow', 'ujicountdown' ) ), array( $vars['ujic_no_text_shadow'] ) );
 		}
 
 			$cnt .= $this->cform_color( __( 'Label Color:', 'ujicountdown' ), array( 'ujic_col_lab' ), array( __( 'Label Text Color', 'ujicountdown' ) ), array( $vars['ujic_col_lab'] ) );
@@ -271,6 +338,14 @@ class Uji_Countdown_Admin {
 
 			$cnt .= '</form>';
 
+			// Preview Metaboxes
+			$this->prev_metaboxes( $cur_style, $vars );
+
+			$style_message = $this->ujic_collect_messages();
+		if ( ! empty( $style_message ) ) {
+				echo $style_message;
+		}
+
 			// Build Metabox
 
 		if ( $cur_id ) {
@@ -278,9 +353,6 @@ class Uji_Countdown_Admin {
 		} else {
 				echo $this->custom_metabox( __( 'Create New Timer Style', 'ujicountdown' ), $cnt, 'ujic-create' );
 		}
-			
-			// Preview Metaboxes
-			$this->prev_metaboxes( $cur_style, $vars );
 	}
 
 		/**
@@ -328,33 +400,6 @@ class Uji_Countdown_Admin {
 	}
 
 		/**
-		 * Multi Custom Metabox template.
-		 *
-		 * @since    2.0
-		 */
-	private function multi_custom_metabox( $name, $cnt, $class = null, $hndle = false ) {
-			$meta      = '<div class="metabox-holder' . ( ( isset( $class ) && ! empty( $class ) ) ? ' ' . esc_attr( $class ) : '' ) . '">';
-			$i         = 0;
-			$cls_hndle = '';
-		foreach ( $cnt as $content ) {
-				$meta .= '<div class="postbox">';
-			if ( $hndle ) {
-				$meta     .= '<div class="handlediv" title="Click to toggle"><br/></div>';
-				$cls_hndle = ' class="hndle"';
-			}
-				$meta .= '<h3' . esc_html( $cls_hndle ) . '><span>' . esc_html( $name[ $i ] ) . '</span></h3>';
-				$meta .= '<div class="inside">';
-				$meta .= $content;
-				$meta .= '</div>';
-				$meta .= '</div>';
-				$i++;
-		}
-			$meta .= '</div>';
-
-			return $meta;
-	}
-
-		/**
 		 * Preview metaboxes.
 		 *
 		 * @since    2.0
@@ -362,13 +407,13 @@ class Uji_Countdown_Admin {
 	private function sc_metaboxes( $style, $countDownOptions ) {
 			$sc = '<div class="ujic-shortcode">
                         <div id="ujic-scode">[ujicountdown]</div>
-                        <button class="ujibtn-sc-copy button button-secondary" data-clipboard-action="copy" data-clipboard-target="#ujic-scode">
+                        <button type="button" class="ujibtn-sc-copy button button-secondary" data-clipboard-action="copy" data-clipboard-target="#ujic-scode" disabled="disabled">
                                 Copy Shortcode
                          </button>
                      </div>';
 
 		if ( isset( $sc ) && ! empty( $sc ) ) {
-				echo $this->custom_metabox( __( 'Shortcode', 'ujicountdown' ), $sc, 'ujic-create ujic-sc', false );
+				echo $this->custom_metabox( __( 'Shortcode', 'ujicountdown' ), $sc, 'ujic-create ujic-sc ujic-shortcode-preview', false );
 		}
 	}
 
@@ -381,38 +426,38 @@ class Uji_Countdown_Admin {
 			$prw  = '<div class="ujic-' . $style . ' hasCountdown" id="ujiCountdown">';
 			$prw .= '<span class="countdown_row ujicf">
                      <span class="countdown_section ujic_y">
-                        <span class="countdown_amount">0</span>
-                        <span class="countdown_amount">1</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">0</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">1</span></span>
                         <span class="countdown_txt">' . __( 'Years', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_o">
-                        <span class="countdown_amount">1</span>
-                        <span class="countdown_amount">1</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">1</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">1</span></span>
                         <span class="countdown_txt">' . __( 'Months', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_w">
-                        <span class="countdown_amount">0</span>
-                        <span class="countdown_amount">2</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">0</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">2</span></span>
                         <span class="countdown_txt">' . __( 'Weeks', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_d">
-                        <span class="countdown_amount">2</span>
-                        <span class="countdown_amount">9</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">2</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">9</span></span>
                         <span class="countdown_txt">' . __( 'Days', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_h">
-                        <span class="countdown_amount">0</span>
-                        <span class="countdown_amount">9</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">0</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">9</span></span>
                         <span class="countdown_txt">' . __( 'Hours', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_m">
-                        <span class="countdown_amount">3</span>
-                        <span class="countdown_amount">1</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">3</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">1</span></span>
                         <span class="countdown_txt">' . __( 'Minutes', 'ujicountdown' ) . '</span>
                      </span>
                      <span class="countdown_section ujic_s">
-                        <span class="countdown_amount">5</span>
-                        <span class="countdown_amount">3</span>
+                        <span class="countdown_amount"><span class="ujic-number-value">5</span></span>
+                        <span class="countdown_amount"><span class="ujic-number-value">3</span></span>
                         <span class="countdown_txt">' . __( 'Seconds', 'ujicountdown' ) . '</span>
                      </span>
                   </span>';
@@ -432,34 +477,27 @@ class Uji_Countdown_Admin {
 	}
 
 		/**
-		 * Premium metaboxes.
-		 *
-		 * @since    2.0
-		 */
-	public function pro_metaboxes() {
-			$pro_sho = '<a href="http://www.wpmanage.com/uji-countdown" target="_blank"><img src="' . esc_url(esc_url( UJICOUNTDOWN_URL )) . 'assets/images/ujic-ps3.png"></a>';
-			echo $this->multi_custom_metabox( array( __( 'Uji Countdown Addons', 'ujicountdown' ) ), array( $pro_sho ), 'ujic-tut' );
-	}
-
-		/**
 		 * Print form style.
 		 *
 		 * @since    2.0
 		 */
 	public function cform_style( $val ) {
 			$styles = $this->ujic_styles();
-			$form   = '<div class="ujic-box">';
+			$form   = '<div class="ujic-box ujic-style-box">';
 		if ( $this->cform_is_edit() ) {
 				$form .= '<div class="label">' . __( 'Style Type:', 'ujicountdown' ) . '</div>';
+				$form .= '<div class="ujic-style-options">';
 				$form .= '<span id="ujic-style-' . esc_attr( $val ) . '" class="ujic-types ujic-types-sel">' . esc_attr( $val ) . '</span>';
 		} else {
-				$form .= '<div class="label">' . __( 'Select Style:', 'ujicountdown' ) . '</div>';
+			$form .= '<div class="label">' . __( 'Choose Style:', 'ujicountdown' ) . '</div>';
+			$form .= '<div class="ujic-style-options">';
 			foreach ( $styles as $style ) {
-					$sel   = ( $style == ( isset( $_GET['style'] ) && ! empty( $_GET['style'] ) ? ujic_clean( wp_unslash( $_GET['style'] ) ) : 'classic' ) ) ? ' ujic-types-sel' : '';
+					$sel   = ( $style == $this->ujic_request_text( 'style', 'classic' ) ) ? ' ujic-types-sel' : '';
 					$form .= '<a href="#" onclick="sel_style(\'' . esc_attr( $style ) . '\')" id="ujic-style-' . esc_attr( $style ) . '" class="ujic-types' . esc_attr( $sel ) . '">' . esc_attr( $style ) . '</a>';
 			}
 		}
 			$form .= '<input name="ujic_style" id="ujic-style" type="hidden" class="normal-text" value="' . esc_attr( $val ) . '"/>';
+			$form .= '</div>';
 			$form .= '</div>';
 			return $form;
 	}
@@ -536,12 +574,12 @@ class Uji_Countdown_Admin {
 	public function cform_select_time( $label, $cls, $hh, $mm ) {
 			$form  = '<div class="ujic-box ' . esc_attr( $cls ) . '">';
 			$form .= '<div class="label">' . esc_html( $label ) . '</div>';
-			$form .= '<div class="ujic-select">';
+			$form .= '<div class="ujic-select ujic-time-selects">';
 			$form .= '<select class="select of-input" name="ujic_hh" id="ujic_hh">';
 		foreach ( $hh as $time ) {
 				$form .= '<option value="' . esc_attr( $time['value'] ) . '" />' . esc_attr( $time['text'] ) . '</option>';
 		}
-			$form .= '</select> : ';
+			$form .= '</select><span class="ujic-time-separator">:</span>';
 
 			$form .= '<select class="select of-input" name="ujic_mm" id="ujic_mm">';
 		foreach ( $mm as $time ) {
@@ -559,15 +597,15 @@ class Uji_Countdown_Admin {
 		 * @since    2.1.3
 		 */
 	public function cform_reccur( $label, $timelabel, $info ) {
-			$form  = '<div class="ujic-box">
+			$form  = '<div class="ujic-box ujic-recurring">
                  <div class="label">' . esc_html( $label ) . '</div>';
-			$form .= '<div class="ujic-select"><input type="text" value="" name="ujic_rec_every" id="ujic_rec_every" class="small-text">';
+			$form .= '<div class="ujic-select ujic-recurring-controls"><input type="text" value="" name="ujic_rec_every" id="ujic_rec_every" class="small-text">';
 			$form .= ' <select class="select of-input" name="ujic_rec_time" id="ujic_rec_time">';
 		foreach ( $timelabel as $time ) {
 				$form .= '<option value="' . esc_attr( $time['value'] ) . '" />' . esc_html( $time['text'] ) . '</option>';
 		}
 			$form .= '</select></div>';
-			$form .= '<div class="ujic-block-box"> <input type="text" value="" name="ujic_rec_repeat" id="ujic_rec_repeat" class="small-text"> ' . esc_html( $info ) . '</div>';
+			$form .= '<div class="ujic-block-box ujic-recurring-repeat"><input type="text" value="" name="ujic_rec_repeat" id="ujic_rec_repeat" class="small-text"> <span>' . esc_html( $info ) . '</span></div>';
 			$form .= '</div>';
 			return $form;
 	}
@@ -583,8 +621,10 @@ class Uji_Countdown_Admin {
 			// values
 			$val = ( $val == '' ) ? 32 : esc_attr( $val );
 			// html output
-			$form .= '<input type="text" name="' . $name . '" id="' . $name . '" value="' . $val . '" class="mini" readonly="readonly" />';
-			$form .= '<div id="' . esc_attr( $name ) . '-slider" class="ujic_sliderui" style="margin-left: 7px;" data-id="' . esc_attr( $name ) . '" data-val="' . esc_attr( $val ) . '" data-min="' . esc_attr( $min ) . '" data-max="' . esc_attr( $max ) . '" data-step="' . esc_attr( $step ) . '"></div>';
+			$form .= '<div class="ujic-slider-control">';
+			$form .= '<input type="text" name="' . esc_attr( $name ) . '" id="' . esc_attr( $name ) . '" value="' . esc_attr( $val ) . '" class="mini" readonly="readonly" />';
+			$form .= '<div id="' . esc_attr( $name ) . '-slider" class="ujic_sliderui" data-id="' . esc_attr( $name ) . '" data-val="' . esc_attr( $val ) . '" data-min="' . esc_attr( $min ) . '" data-max="' . esc_attr( $max ) . '" data-step="' . esc_attr( $step ) . '"></div>';
+			$form .= '</div>';
 			$form .= '</div>';
 			return $form;
 	}
@@ -594,8 +634,8 @@ class Uji_Countdown_Admin {
 		 *
 		 * @since    2.0
 		 */
-	public function cform_color( $label, $names, $clabels, $vals ) {
-			$form  = '<div class="ujic-box ujic-color">';
+	public function cform_color( $label, $names, $clabels, $vals, $class = '' ) {
+			$form  = '<div class="ujic-box ujic-color' . ( ! empty( $class ) ? ' ' . esc_attr( $class ) : '' ) . '">';
 			$form .= '<div class="label">' . esc_html( $label ) . '</div>';
 			$form .= '<div class="ujic-color-box">';
 			$i     = 0;
@@ -620,9 +660,9 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_buttons() {
-			$type = ( isset( $_GET['edit'] ) && ! empty( $_GET['edit'] ) ) ? ujic_clean( wp_unslash( $_GET['edit'] ) ) : '';
+			$type = $this->ujic_request_id( 'edit' );
 			$form = '<div class="ujic-submit-hold">';
-		if ( ! empty( $type ) && is_numeric( $type ) ) {
+		if ( ! empty( $type ) ) {
 				$form .= get_submit_button( __( 'Update Style', 'ujicountdown' ), 'primary', 'submit_ujic', true );
 				$form .= '<a href="?page=ujicountdown&tab=tab_ujic_new" class="button button-secondary" id="ujic_table_new">' . __( 'Add New Style', 'ujicountdown' ) . '</a>';
 		} else {
@@ -639,13 +679,10 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_date( $label, $id ) {
-			wp_enqueue_script( 'jquery-ui-datepicker' );
-			wp_enqueue_style( 'jquery-ui', esc_url ( UJICOUNTDOWN_URL ) . 'assets/css/jquery-ui.min.css' );
-
 			$form  = '<div class="ujic-box ujic-date">';
 			$form .= '<div class="label">' . esc_html( $label ) . '</div>';
 
-			$form .= '<input type="text" class="ujic_date_admin" name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" />';
+			$form .= '<input type="date" class="ujic-date-input" name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" />';
 
 			$form .= '</div>';
 
@@ -658,15 +695,14 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_time( $label ) {
-			wp_enqueue_script( 'jquery-ui-datepicker' );
-			wp_enqueue_style( 'jquery-ui',  esc_url ( UJICOUNTDOWN_URL ) . 'assets/css/jquery-ui.min.css' );
-
 			$form  = '<div class="ujic-box ujic-time">';
 			$form .= '<div class="label">' . esc_html( $label ) . '</div>';
 
-			$form .= '<input type="text" class="ujic_thou" name="ujic_thou" value="" placeholder="Hour(s)" class="small-text" style="max-width: 80px;"/> : ';
-			$form .= '<input type="text" class="ujic_tmin" name="ujic_tmin" value="" placeholder="Minute(s)" class="small-text" style="max-width: 80px;"/> : ';
-			$form .= '<input type="text" class="ujic_tsec" name="ujic_tsec" value="" placeholder="Second(s)" class="small-text" style="max-width: 80px;"/>';
+			$form .= '<div class="ujic-duration-controls">';
+			$form .= '<input type="text" class="ujic_thou small-text" name="ujic_thou" value="" placeholder="Hour(s)" /> <span class="ujic-time-separator">:</span>';
+			$form .= '<input type="text" class="ujic_tmin small-text" name="ujic_tmin" value="" placeholder="Minute(s)" /> <span class="ujic-time-separator">:</span>';
+			$form .= '<input type="text" class="ujic_tsec small-text" name="ujic_tsec" value="" placeholder="Second(s)" />';
+			$form .= '</div>';
 
 			$form .= '</div>';
 
@@ -679,9 +715,9 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_ftype( $cur_style, $id = null ) {
-			$type = ( isset( $_GET['edit'] ) && ! empty( $_GET['edit'] ) ) ? ujic_clean( wp_unslash( $_GET['edit'] ) ) : '';
+			$type = $this->ujic_request_id( 'edit' );
 
-		if ( ! empty( $type ) && is_numeric( $type ) && ! empty( $id ) ) {
+		if ( ! empty( $type ) && ! empty( $id ) ) {
 				$form = '<form method="post" action="options-general.php?page=ujicountdown&tab=tab_ujic_new&edit=' . esc_attr( $id ) . '">';
 		} else {
 				$form = '<form method="post" action="options-general.php?page=ujicountdown&tab=tab_ujic_new&style=' . esc_attr( $cur_style ) . '&save=true">';
@@ -696,18 +732,24 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_save_db() {
+		$posts = $this->ujic_post_values();
+
 		if ( $this->cform_is_create() ) {
-			if ( $this->cform_errors() ) {
-				$this->ins_ujic_db( ujic_clean( wp_unslash($_POST ) ) );
-				$this->ujic_message( __( 'Your Timer Style Has Been Created', 'ujicountdown' ) );
+			$this->ujic_require_manage_options();
+
+			if ( $this->cform_errors( $posts ) ) {
+				$this->ins_ujic_db( $posts );
+				$this->ujic_message( __( 'Timer style created successfully.', 'ujicountdown' ), false, true );
 				wp_add_inline_script( 'jquery-core', 'ujic_admin_home();' );
 			}
 		}
 
-		if ( isset( $_POST ) && ! empty( $_POST ) && $this->cform_is_edit() ) {
-			if ( $this->cform_errors() ) {
-					$this->upd_ujic_db( ujic_clean( wp_unslash($_POST) ), ujic_clean( wp_unslash( $_GET['edit'] ) ) );
-					$this->ujic_message( __( 'Your Timer Style Has Been Updated', 'ujicountdown' ) );
+		if ( ! empty( $posts ) && $this->cform_is_edit() ) {
+			$this->ujic_require_manage_options();
+
+			if ( $this->cform_errors( $posts ) ) {
+					$this->upd_ujic_db( $posts, $this->ujic_request_id( 'edit' ) );
+					$this->ujic_message( __( 'Timer style updated successfully.', 'ujicountdown' ), false, true );
 			}
 		}
 	}
@@ -717,23 +759,30 @@ class Uji_Countdown_Admin {
 		 *
 		 * @since    2.0
 		 */
-	private function cform_errors() {
+	private function cform_errors( $posts ) {
 			global $wpdb;
 			$ujic_form_err = '';
+			$name          = $posts['ujic_name'] ?? '';
+			$formats       = array( 'ujic_d', 'ujic_h', 'ujic_m', 'ujic_s', 'ujic_y', 'ujic_o', 'ujic_w' );
 
 			// name not empty
-		if ( empty( $_POST['ujic_name'] ) ) {
+		if ( '' === $name ) {
 				$ujic_form_err .= __( 'Please enter timer title', 'ujicountdown' ) . '<br/>';
 		}
 
 			// check format
-		if ( ! isset( $_POST['ujic_d'] ) && ! isset( $_POST['ujic_h'] ) && ! isset( $_POST['ujic_m'] ) && ! isset( $_POST['ujic_s'] ) && ! isset( $_POST['ujic_y'] ) && ! isset( $_POST['ujic_o'] ) && ! isset( $_POST['ujic_w'] ) ) {
+		if ( empty( array_intersect( $formats, array_keys( $posts ) ) ) ) {
 				$ujic_form_err .= __( 'Please select the timer format', 'ujicountdown' ) . '<br/>';
 		}
 
 			// check name exist
-		if ( ! empty( $_POST['ujic_name'] ) && ! $this->cform_is_edit() ) {
-				$cname = $wpdb->get_var( 'SELECT title FROM ' . $this->ujic_tab_name() . " WHERE title = '" . esc_sql( ujic_clean( wp_unslash( $_POST['ujic_name'] ) ) ) . "'" );
+		if ( '' !== $name && ! $this->cform_is_edit() ) {
+				$cname = $wpdb->get_var(
+					$wpdb->prepare(
+						'SELECT title FROM ' . $this->ujic_tab_name() . ' WHERE title = %s',
+						$name
+					)
+				);
 			if ( ! empty( $cname ) ) {
 					$ujic_form_err .= __( 'This name already exist. Please change the timer name.  <br/>', 'ujicountdown' );
 			}
@@ -742,7 +791,7 @@ class Uji_Countdown_Admin {
 		if ( empty( $ujic_form_err ) ) {
 				return true;
 		} elseif ( ! empty( $ujic_form_err ) ) {
-				$this->ujic_message( $ujic_form_err, true );
+				$this->ujic_message( $ujic_form_err, true, true );
 				return false;
 		}
 	}
@@ -768,9 +817,11 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	public function cform_is_create() {
-		if ( isset( $_POST ) && ! empty( $_POST ) && isset( $_GET['save'] ) && ! empty( $_GET['save'] ) && $_GET['save'] == 'true' ) {
+			$posts = $this->ujic_post_values();
+
+		if ( ! empty( $posts ) && 'true' === $this->ujic_request_text( 'save' ) ) {
 				// 2.0.7 Fix Cross-Site Request Forgery attacks
-				$this->ujic_secure( 'ujic_secure', 'ujic_secure_form', ujic_clean( wp_unslash( $_POST ) ) );
+				$this->ujic_secure( 'ujic_secure', 'ujic_secure_form', $posts );
 				return true;
 		} else {
 				return false;
@@ -783,11 +834,7 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	public function cform_is_edit() {
-		if ( isset( $_GET['edit'] ) && ( ! empty( $_GET['edit'] ) && is_numeric( $_GET['edit'] ) ) ) {
-				return true;
-		} else {
-				return false;
-		}
+			return 0 !== $this->ujic_request_id( 'edit' );
 	}
 
 		/**
@@ -796,10 +843,17 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	private function cform_delete() {
-		if ( isset( $_GET['del'] ) && ( ! empty( $_GET['del'] ) && is_numeric( $_GET['del'] ) ) ) {			
-				$this->del_ujic_db( trim( ujic_clean( wp_unslash($_GET['del'] ) ) ) );
-				$this->ujic_message( __( 'Your countdown style was deleted', 'ujicountdown' ) );
+			$id = $this->ujic_request_id( 'del' );
+
+		if ( ! $id ) {
+				return;
 		}
+
+			$this->ujic_require_manage_options();
+			check_admin_referer( 'ujic_delete_style_' . $id );
+
+			$this->del_ujic_db( $id );
+			$this->ujic_message( __( 'Your countdown style was deleted', 'ujicountdown' ) );
 	}
 
 		/**
@@ -815,11 +869,25 @@ class Uji_Countdown_Admin {
 		if ( ! empty( $ujic_datas ) ) {
 			foreach ( $ujic_datas as $ujic ) {
 				$ujic_style = ! empty( $ujic->style ) ? $ujic->style : 'classic';
-				$ujictab   .= '<tr>
-                                <td>' . esc_html( $ujic->time ) . '</td>
-                                <td>' . esc_html( $ujic->title ) . '</td>
-                                <td><span id="ujic-style-' . esc_attr( $ujic_style ) . '" class="ujic-types">' . esc_attr( $ujic_style ) . '</span></td>
-                                <td><a href="?page=ujicountdown&tab=tab_ujic_new&edit=' . esc_attr( $ujic->id ) . '"><i class="dashicons dashicons-welcome-write-blog"></i>Edit</a> | <a href="options-general.php?page=ujicountdown&del=' . esc_attr( $ujic->id ) . '"><i class="dashicons dashicons-trash"></i> Delete</a></td>
+				$style_name = ucwords( str_replace( array( '-', '_' ), ' ', $ujic_style ) );
+				$row_time   = strtotime( $ujic->time );
+				$row_date   = $row_time ? date_i18n( 'M j, Y', $row_time ) : $ujic->time;
+				$row_clock  = $row_time ? date_i18n( 'H:i:s', $row_time ) : '';
+				$delete_url = wp_nonce_url(
+					add_query_arg(
+						array(
+							'page' => 'ujicountdown',
+							'del'  => absint( $ujic->id ),
+						),
+						admin_url( 'options-general.php' )
+					),
+					'ujic_delete_style_' . absint( $ujic->id )
+				);
+				$ujictab   .= '<tr class="ujic-style-row">
+                                <td class="ujic-list-date"><span class="ujic-list-date-main">' . esc_html( $row_date ) . '</span><span class="ujic-list-time">' . esc_html( $row_clock ) . '</span></td>
+                                <td class="ujic-list-name"><span>' . esc_html( $ujic->title ) . '</span><span class="ujic-list-subtitle">' . esc_html( $style_name ) . ' countdown</span></td>
+                                <td class="ujic-list-style"><span id="ujic-style-' . esc_attr( $ujic_style ) . '" class="ujic-types">' . esc_attr( $ujic_style ) . '</span></td>
+                                <td class="ujic-list-actions"><a class="ujic-action-link ujic-action-edit" href="?page=ujicountdown&tab=tab_ujic_new&edit=' . esc_attr( $ujic->id ) . '"><i class="dashicons dashicons-welcome-write-blog"></i><span>Edit</span></a><a class="ujic-action-link ujic-action-delete" href="' . esc_url( $delete_url ) . '"><i class="dashicons dashicons-trash"></i><span>Delete</span></a></td>
                             </tr>';
 			}
 		}
@@ -832,14 +900,46 @@ class Uji_Countdown_Admin {
 		 *
 		 * @since    2.0
 		 */
-	private function ujic_message( $message, $errormsg = false ) {
-		if ( $errormsg ) {
-				echo '<div id="message" class="error">';
-		} else {
-				echo '<div id="message" class="updated fade">';
+	private function ujic_message( $message, $errormsg = false, $defer = false ) {
+		$message_html = $this->ujic_message_markup( $message, $errormsg );
+
+		if ( $defer ) {
+				$this->ujic_admin_messages[] = $message_html;
+				return;
 		}
 
-			echo '<p><strong>' . wp_kses_post( $message ) . '</strong></p></div>';
+			echo $message_html;
+	}
+
+		/**
+		 * Collect deferred admin messages.
+		 *
+		 * @since    2.3.4
+		 */
+	private function ujic_collect_messages() {
+			$messages                  = implode( '', $this->ujic_admin_messages );
+			$this->ujic_admin_messages = array();
+
+			return $messages;
+	}
+
+		/**
+		 * Build message notification markup.
+		 *
+		 * @since    2.3.4
+		 */
+	private function ujic_message_markup( $message, $errormsg = false ) {
+		$type  = $errormsg ? 'error' : 'success';
+		$title = $errormsg ? __( 'Action needed', 'ujicountdown' ) : __( 'Saved', 'ujicountdown' );
+		$icon  = $errormsg ? 'dashicons-warning' : 'dashicons-yes-alt';
+		$role  = $errormsg ? 'alert' : 'status';
+		$html  = '';
+
+			$html .= '<div class="ujic-admin-message ujic-admin-message--' . esc_attr( $type ) . '" role="' . esc_attr( $role ) . '">';
+			$html .= '<span class="dashicons ' . esc_attr( $icon ) . '" aria-hidden="true"></span>';
+			$html .= '<p><strong class="ujic-message-title">' . esc_html( $title ) . '</strong><span class="ujic-message-text">' . wp_kses_post( $message ) . '</span></p></div>';
+
+			return $html;
 	}
 
 		/**
@@ -857,7 +957,21 @@ class Uji_Countdown_Admin {
 			// Build Forms
 			$cnt  = '<form method="post" action="options-general.php?page=ujicountdown&tab=tab_ujic_set&saveset=true">';
 			$cnt .= apply_filters( 'ujic_admin_newset', $cnt );
-			$cnt .= $this->cform_checkbox( __( 'Enable user time:', 'ujicountdown' ), array( 'ujic_utime' ), array( __( "Timer based on the users system time not the server time.<br> Don't enable it if you need the same time for any timezone!<br><strong>Default is the server time!</strong>", 'ujicountdown' ) ), array( ( isset( $vars['ujic_utime'] ) ? $vars['ujic_utime'] : false ) ) );
+			$default_time_help = __( 'Default is the server time!', 'ujicountdown' );
+			$cnt .= $this->cform_checkbox(
+				__( 'Enable user time:', 'ujicountdown' ),
+				array( 'ujic_utime' ),
+				array(
+					sprintf(
+						'%s<br>%s <span class="ujic-info-tooltip" title="%s"><span class="dashicons dashicons-info-outline" aria-hidden="true"></span><span class="ujic-info-tooltip-text">%s</span></span>',
+						esc_html__( 'Timer based on the users system time not the server time.', 'ujicountdown' ),
+						esc_html__( "Don't enable it if you need the same time for any timezone!", 'ujicountdown' ),
+						esc_attr( $default_time_help ),
+						esc_html( $default_time_help )
+					),
+				),
+				array( ( isset( $vars['ujic_utime'] ) ? $vars['ujic_utime'] : false ) )
+			);
 			$cnt .= $this->cform_checkbox( __( 'Right-To-Left (RTL):', 'ujicountdown' ), array( 'ujic_rtl' ), array( __( 'Writing starts from the right of the page and continues to the left.', 'ujicountdown' ) ), array( ( isset( $vars['ujic_rtl'] ) ? $vars['ujic_rtl'] : false ) ) );
 			$cnt .= $this->cform_checkbox( __( 'Remove Settings', 'ujicountdown' ), array( 'ujic_remove' ), array( __( 'This option will remove all settings and styles when <strong>Delete plugin</strong>', 'ujicountdown' ) ), array( ( isset( $vars['ujic_remove'] ) ? $vars['ujic_remove'] : false ) ) );
 			$cnt .= $this->cform_title( __( 'Quick Translation', 'ujicountdown' ) );
@@ -868,7 +982,9 @@ class Uji_Countdown_Admin {
 				$val  = ( isset( $vars[ $v ] ) ) ? $vars[ $v ] : '';
 				$cnt .= $this->cform_input( __( $n . ':', 'ujicountdown' ), $v, $val, 'default-text' );
 		}
+			$cnt .= '<div class="ujic-settings-actions ujic-submit-hold">';
 			$cnt .= get_submit_button( __( 'Save Changes', 'ujicountdown' ), 'primary', 'submit_ujic', true );
+			$cnt .= '</div>';
 
 			$cnt .= wp_nonce_field( 'ujic_secureset', 'ujic_secureset_form', true, false );
 
@@ -883,16 +999,17 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	public function save_timerset() {
-		if ( isset( $_POST ) && ! empty( $_POST ) && isset( $_GET['saveset'] ) && ! empty( $_GET['saveset'] ) && $_GET['saveset'] == 'true' ) {
-				// 2.0.7 Fix Cross-Site Request Forgery attacks
-				$this->ujic_secure( 'ujic_secureset', 'ujic_secureset_form', ujic_clean( wp_unslash( $_POST ) ) );
+			$settings = $this->ujic_post_values();
 
-				$settings = $this->sanitize_array( ujic_clean( wp_unslash( $_POST ) ) );
+		if ( ! empty( $settings ) && 'true' === $this->ujic_request_text( 'saveset' ) ) {
+				$this->ujic_require_manage_options();
+				// 2.0.7 Fix Cross-Site Request Forgery attacks
+				$this->ujic_secure( 'ujic_secureset', 'ujic_secureset_form', $settings );
 
 				unset( $settings['submit_ujic'] );
 				update_option( 'ujic_set', $settings );
 				$this->ujic_message( __( 'Settings saved.', 'ujicountdown' ) );
-		} elseif ( isset( $_POST ) && ! empty( $_POST ) ) {
+		} elseif ( ! empty( $settings ) ) {
 				$this->ujic_message( __( 'Some error occured. Please try again.', 'ujicountdown' ) );
 		}
 	}
@@ -903,9 +1020,9 @@ class Uji_Countdown_Admin {
 		 * @since    2.0
 		 */
 	public function get_timerset( $name = null ) {
-			$vars = get_option( 'ujic_set' );
+			$vars = get_option( 'ujic_set', array() );
 		if ( $name ) {
-				return $vars[ $name ];
+				return $vars[ $name ] ?? false;
 		} else {
 				return $vars;
 		}
@@ -923,6 +1040,57 @@ class Uji_Countdown_Admin {
 		}
 	}
 
+		/**
+		 * Get a sanitized text value from the admin query string.
+		 *
+		 * @since 2.3.5
+		 */
+	protected function ujic_request_text( $key, $default = '' ) {
+		if ( ! isset( $_GET[ $key ] ) ) {
+			return $default;
+		}
+
+			$value = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+			return '' === $value ? $default : $value;
+	}
+
+		/**
+		 * Get a positive id value from the admin query string.
+		 *
+		 * @since 2.3.5
+		 */
+	protected function ujic_request_id( $key ) {
+		if ( ! isset( $_GET[ $key ] ) ) {
+			return 0;
+		}
+
+			return absint( wp_unslash( $_GET[ $key ] ) );
+	}
+
+		/**
+		 * Get sanitized admin form data.
+		 *
+		 * @since 2.3.5
+		 */
+	protected function ujic_post_values() {
+		if ( empty( $_POST ) ) {
+			return array();
+		}
+
+			return $this->sanitize_array( wp_unslash( $_POST ) );
+	}
+
+		/**
+		 * Require settings capability before data changes.
+		 *
+		 * @since 2.3.5
+		 */
+	protected function ujic_require_manage_options() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to manage Uji Countdown.', 'ujicountdown' ) );
+		}
+	}
+
 	   /**
 		* Sanitize values in array
 		*
@@ -933,8 +1101,15 @@ class Uji_Countdown_Admin {
 			$new_input = array();
 
 			// Loop through the input and sanitize each of the values
-		foreach ( $input as $key => $val ) {
-				$new_input[ $key ] = sanitize_text_field( esc_attr( $val ) );
+		foreach ( (array) $input as $key => $val ) {
+				$clean_key = sanitize_key( $key );
+
+			if ( is_array( $val ) ) {
+				$new_input[ $clean_key ] = $this->sanitize_array( $val );
+				continue;
+			}
+
+				$new_input[ $clean_key ] = sanitize_text_field( $val );
 		}
 
 			return $new_input;

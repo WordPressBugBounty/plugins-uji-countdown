@@ -55,6 +55,32 @@
         clear: both;
 }
 
+.ujic-animate-numbers .ujic-number-value.ujic-number-changing,
+.ujic-animate-numbers .circles-text.ujic-number-changing {
+	display: inline-block;
+	animation: ujic-number-change 180ms ease-out;
+	will-change: opacity, transform;
+}
+
+@keyframes ujic-number-change {
+	0% {
+		opacity: 0.45;
+		transform: translateY(6px) scale(0.96);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ujic-animate-numbers .ujic-number-value.ujic-number-changing,
+	.ujic-animate-numbers .circles-text.ujic-number-changing {
+		animation: none;
+	}
+}
+
 /* Visual Composer Fixes */
 .ujic-hold{
   padding: 0!important;

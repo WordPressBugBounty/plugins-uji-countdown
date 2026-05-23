@@ -57,6 +57,17 @@ jQuery(document).ready(function ($) {
 		},
 	});
 
+	jQuery('.ujic-modern-admin .wp-color-result').on('click.ujicColorPicker', function () {
+		var currentPicker = jQuery(this).closest('.wp-picker-container');
+
+		jQuery('.ujic-modern-admin .wp-picker-container.wp-picker-active')
+			.not(currentPicker)
+			.find('.ujic_colorpick')
+			.each(function () {
+				jQuery(this).wpColorPicker('close');
+			});
+	});
+
 	/* JQuery Checkbox/Radio */
 	jQuery('input').iCheck({
 		checkboxClass: 'icheckbox_flat-pink',
@@ -74,6 +85,50 @@ jQuery(document).ready(function ($) {
 	if (jQuery('#ujic_name').length  ) {
 		/* Style Preview */
 		window[fname].init();
+		if (jQuery('#ujic_ani').length) {
+			var update_number_animation = function () {
+				ujic_bind_number_animation(
+					'ujiCountdown',
+					jQuery('#ujic_ani').is(':checked')
+				);
+			};
+
+			update_number_animation();
+			jQuery('#ujic_ani').on('ifChanged change', update_number_animation);
+		}
+		if (jQuery('#ujic_no_box_color').length) {
+			var update_box_color = function () {
+				ujic_toggle_box_color();
+				if (
+					!jQuery('#ujic_no_box_color').is(':checked') &&
+					window[fname] &&
+					typeof window[fname].the_colors === 'function'
+				) {
+					window[fname].the_colors();
+				}
+			};
+
+			update_box_color();
+			jQuery('#ujic_no_box_color').on('ifChanged change', update_box_color);
+		}
+		if (jQuery('#ujic_no_text_shadow').length) {
+			var update_text_shadow = function () {
+				ujic_toggle_text_shadow();
+				if (
+					!jQuery('#ujic_no_text_shadow').is(':checked') &&
+					window[fname] &&
+					typeof window[fname].the_colors === 'function'
+				) {
+					window[fname].the_colors();
+				}
+			};
+
+			update_text_shadow();
+			jQuery('#ujic_no_text_shadow').on(
+				'ifChanged change',
+				update_text_shadow
+			);
+		}
 	}
 });
 
@@ -97,6 +152,108 @@ function ujic_admin_home() {
 	window.location.href = 'options-general.php?page=ujicountdown';
 }
 
+function ujic_bind_number_animation(containerId, enabled) {
+	var root = document.getElementById(containerId);
+	var raf = window.requestAnimationFrame || function (callback) {
+		return setTimeout(callback, 16);
+	};
+
+	if (!root) {
+		return;
+	}
+
+	if (root._ujicNumberObserver) {
+		root._ujicNumberObserver.disconnect();
+		root._ujicNumberObserver = null;
+	}
+
+	root.classList.remove('ujic-animate-numbers');
+	root._ujicNumberTexts = null;
+	root._ujicNumberFrame = null;
+
+	if (!enabled || !window.MutationObserver) {
+		return;
+	}
+
+	function collect_texts() {
+		var texts = [];
+		var targets = root.querySelectorAll('.countdown_amount, .circles-text');
+
+		Array.prototype.forEach.call(targets, function (target, index) {
+			texts[index] = target.textContent;
+		});
+
+		return texts;
+	}
+
+	function animate_changes() {
+		var previous = root._ujicNumberTexts || [];
+		var next = [];
+		var targets = root.querySelectorAll('.countdown_amount, .circles-text');
+
+		root._ujicNumberFrame = null;
+
+		Array.prototype.forEach.call(targets, function (target, index) {
+			var text = target.textContent;
+			var animationTarget =
+				target.querySelector('.ujic-number-value') || target;
+			next[index] = text;
+
+			if (
+				typeof previous[index] !== 'undefined' &&
+				previous[index] !== text
+			) {
+				animationTarget.classList.remove('ujic-number-changing');
+				void animationTarget.offsetWidth;
+				animationTarget.classList.add('ujic-number-changing');
+			}
+		});
+
+		root._ujicNumberTexts = next;
+	}
+
+	function schedule_animation_check() {
+		if (root._ujicNumberFrame) {
+			return;
+		}
+
+		root._ujicNumberFrame = raf(animate_changes);
+	}
+
+	root.classList.add('ujic-animate-numbers');
+	root._ujicNumberTexts = collect_texts();
+	root._ujicNumberObserver = new MutationObserver(schedule_animation_check);
+	root._ujicNumberObserver.observe(root, {
+		childList: true,
+		characterData: true,
+		subtree: true,
+	});
+}
+
+function ujic_toggle_box_color() {
+	var noBoxColor = jQuery('#ujic_no_box_color').is(':checked');
+
+	jQuery('.ujic-box-color-setting').toggle(!noBoxColor);
+
+	if (noBoxColor) {
+		jQuery('.ujic-classic').find('.countdown_amount').css({
+			background: 'transparent',
+			filter: 'none',
+			boxShadow: 'none',
+		});
+	}
+}
+
+function ujic_toggle_text_shadow() {
+	var noTextShadow = jQuery('#ujic_no_text_shadow').is(':checked');
+
+	jQuery('#ujic_col_sw').closest('.ujic-color-hold').toggle(!noTextShadow);
+
+	if (noTextShadow) {
+		jQuery('.countdown_amount').css('text-shadow', 'none');
+	}
+}
+
 /**
  *
  * Preview Clasic Panel Admin
@@ -112,11 +269,41 @@ function ujic_admin_home() {
 			if (style.length) {
 				this.the_size();
 				this.the_lab_sz();
-                                this.the_format();
+				this.the_format();
 				this.the_colors();
 				this.the_labels();
 				this.the_fonts();
+				this.sync_digit_width();
 			}
+		},
+		sync_digit_width: function () {
+			var size = $('#ujic_size');
+			var newsize = size.length ? parseInt(size.val(), 10) : 35;
+			var amounts = $('#ujiCountdown').find('.countdown_amount');
+			var visibleAmounts = amounts.filter(':visible');
+			var getW = 0;
+
+			if (!visibleAmounts.length) {
+				return;
+			}
+
+			if (!newsize) {
+				newsize = 35;
+			}
+
+			amounts.css('width', '');
+			amounts.css('padding', '5px 10px');
+
+			visibleAmounts.each(function () {
+				if ($(this).outerWidth() > getW) {
+					getW = $(this).outerWidth();
+				}
+			});
+
+			getW = Math.ceil(getW);
+
+			amounts.css('padding', '5px 0');
+			amounts.css('width', getW + 'px');
 		},
 		/// Size
 		the_size: function (val) {
@@ -128,6 +315,7 @@ function ujic_admin_home() {
 			$('#ujiCountdown')
 				.find('.countdown_amount')
 				.css('font-size', newsize + 'px');
+			this.sync_digit_width();
 		},
 		/// Label Size
 		the_lab_sz: function (val) {
@@ -173,12 +361,14 @@ function ujic_admin_home() {
                                         $('#ujiCountdown')
 						.find('.' + id)
 						.show();
+					classicSelect.sync_digit_width();
                                 });
 				$('#' + format[i]).on('ifUnchecked', function(){ 
                                     var id = $(this).attr('id');
 					$('#ujiCountdown')
 						.find('.' + id)
 						.hide();
+					classicSelect.sync_digit_width();
 				});
 			}
 		},
@@ -208,13 +398,28 @@ function ujic_admin_home() {
 			var col_up = $('#ujic_col_up').val();
 			var col_dw = $('#ujic_col_dw').val();
 			var col_lab = $('#ujic_col_lab').val();
+			var no_box_color = $('#ujic_no_box_color').is(':checked');
+			var no_text_shadow = $('#ujic_no_text_shadow').is(':checked');
 			var col_sub = $('#ujic_subscrFrmSubmitColor').length
 				? $('#ujic_subscrFrmSubmitColor').val()
 				: '#000000';
 
 			$('.countdown_amount').css('color', col_txt);
-			$('.countdown_amount').css('text-shadow', '1px 1px 1px ' + col_sw);
+			$('.countdown_amount').css(
+				'text-shadow',
+				no_text_shadow ? 'none' : '1px 1px 1px ' + col_sw
+			);
 
+			$('.ujic-box-color-setting').toggle(!no_box_color);
+			$('#ujic_col_sw').closest('.ujic-color-hold').toggle(!no_text_shadow);
+
+			if (no_box_color) {
+				$('.ujic-classic').find('.countdown_amount').css({
+					background: 'transparent',
+					filter: 'none',
+					boxShadow: 'none',
+				});
+			} else {
 			$('.ujic-classic')
 				.find('.countdown_amount')
 				.css(
@@ -285,6 +490,7 @@ function ujic_admin_home() {
 						col_dw +
 						"',GradientType=0 )"
 				); /* IE6-9 */
+			}
 
 			$('.countdown_txt').css('color', col_lab);
 
@@ -369,6 +575,10 @@ function ujic_admin_home() {
 					$('.countdown_amount').css('color', hex);
 					break;
 				case 'ujic_col_sw':
+					if ($('#ujic_no_text_shadow').is(':checked')) {
+						$('.countdown_amount').css('text-shadow', 'none');
+						break;
+					}
 					$('.countdown_amount').css(
 						'text-shadow',
 						'1px 1px 1px ' + hex
@@ -598,21 +808,18 @@ function ujic_admin_home() {
 		},
 		/// Text Labels
 		the_labels: function () {
-			if ($('#ujic_txt').is(':checked')) {
-				$('.countdown_txt').show();
-			} else {
-				$('.countdown_txt').hide();
-			}
-
-			//live change
-			$('.iCheck-helper').click(function () {
-				var id = $(this).parent().find(':checkbox').attr('id');
-				if (id == 'ujic_txt' && $(this).parent().hasClass('checked')) {
+			function update_time_labels() {
+				if ($('#ujic_txt').is(':checked')) {
 					$('.countdown_txt').show();
-				} else if (id == 'ujic_txt') {
+				} else {
 					$('.countdown_txt').hide();
 				}
-			});
+			}
+
+			update_time_labels();
+
+			// Live change after iCheck updates the original checkbox state.
+			$('#ujic_txt').on('ifChanged change', update_time_labels);
 		},
 		/// Google Font
 		the_fonts: function () {
@@ -626,6 +833,7 @@ function ujic_admin_home() {
 						'" rel="stylesheet" type="text/css">'
 				);
 				$('.countdown_amount').css('font-family', val + ', sans-serif');
+				classicSelect.sync_digit_width();
 			}
 			//live change
 			$('#ujic_goof').bind('change keyup', function () {
@@ -636,8 +844,9 @@ function ujic_admin_home() {
 					'<link href="https://fonts.googleapis.com/css?family=' +
 						the_font +
 						'" rel="stylesheet" type="text/css">'
-				);
+					);
 				$('.countdown_amount').css('font-family', val + ', sans-serif');
+				classicSelect.sync_digit_width();
 			});
 		},
 	};
